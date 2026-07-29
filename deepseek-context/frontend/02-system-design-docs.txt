@@ -1,0 +1,4860 @@
+
+=========================================================
+FILE: .\docs\system-design\api-spec.md
+=========================================================
+
+# API Specification
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The API Specification defines how external applications communicate with Agentic AI OS.
+
+The API provides a stable interface between client applications and the intelligence platform.
+
+Applications must interact only through Agentic AI OS APIs and must never communicate directly with AI providers.
+
+---
+
+# 2. API Goals
+
+The API must provide:
+
+- Stable communication contracts.
+- Provider-independent AI access.
+- Secure authentication.
+- Request validation.
+- Streaming support.
+- Error consistency.
+- Observability.
+- Backward compatibility.
+
+---
+
+# 3. API Architecture
+
+```
+Application
+
+      |
+
+      ▼
+
+API Gateway
+
+      |
+
+      ▼
+
+Agentic AI OS Services
+
+      |
+
+      ├── Provider Engine
+
+      ├── Memory Engine
+
+      ├── Knowledge Engine
+
+      ├── Workflow Engine
+
+      ├── Tool Engine
+
+      └── Agent Framework
+```
+
+---
+
+# 4. API Style
+
+Initial API style:
+
+```
+REST API
+```
+
+Technology:
+
+```
+Fastify
+```
+
+Future support:
+
+- GraphQL
+- WebSocket streaming
+- SDK abstraction
+- Event-based APIs
+
+---
+
+# 5. API Versioning
+
+All APIs must be versioned.
+
+Example:
+
+```
+/api/v1/
+```
+
+Future versions:
+
+```
+/api/v2/
+```
+
+Breaking changes require a new API version.
+
+---
+
+# 6. Authentication
+
+The API uses:
+
+- JWT access tokens
+- Refresh tokens
+- API keys for applications
+
+Authentication flow:
+
+```
+Client
+
+↓
+
+Authenticate
+
+↓
+
+Receive Token
+
+↓
+
+API Requests
+
+↓
+
+Token Validation
+```
+
+---
+
+# 7. Authorization
+
+Authorization is based on:
+
+- User identity
+- Application identity
+- Project ownership
+- Permissions
+- Resource access
+
+Every request must be evaluated before execution.
+
+---
+
+# 8. Core API Domains
+
+The API is divided into domains.
+
+---
+
+# Authentication API
+
+Responsible for:
+
+- Login
+- Token generation
+- Token refresh
+- Logout
+
+Example:
+
+```
+POST /api/v1/auth/login
+
+POST /api/v1/auth/refresh
+```
+
+---
+
+# Application API
+
+Used by client applications.
+
+Responsibilities:
+
+- Register applications.
+- Manage application configuration.
+- Manage API credentials.
+
+Example:
+
+```
+POST /api/v1/applications
+
+GET /api/v1/applications/:id
+```
+
+---
+
+# Chat API
+
+Provides general AI interaction.
+
+Example:
+
+```
+POST /api/v1/chat
+```
+
+Request:
+
+```json
+{
+  "message": "Explain this document",
+  "projectId": "project-id"
+}
+```
+
+Response:
+
+```json
+{
+  "response": "Generated answer",
+  "metadata": {}
+}
+```
+
+---
+
+# Agent API
+
+Provides access to agent execution.
+
+Example:
+
+```
+POST /api/v1/agents/:id/run
+```
+
+Request:
+
+```json
+{
+  "task": "Research topic",
+  "context": {}
+}
+```
+
+---
+
+# Workflow API
+
+Provides workflow execution.
+
+Example:
+
+```
+POST /api/v1/workflows/:id/run
+```
+
+Request:
+
+```json
+{
+  "input": {}
+}
+```
+
+---
+
+# Memory API
+
+Provides memory operations.
+
+Examples:
+
+```
+GET /api/v1/memory
+
+POST /api/v1/memory
+
+DELETE /api/v1/memory/:id
+```
+
+---
+
+# Knowledge API
+
+Provides knowledge operations.
+
+Examples:
+
+```
+POST /api/v1/knowledge/upload
+
+GET /api/v1/knowledge/search
+```
+
+---
+
+# Tool API
+
+Provides controlled tool execution.
+
+Example:
+
+```
+POST /api/v1/tools/:id/execute
+```
+
+Tools must never bypass permission checks.
+
+---
+
+# Provider API
+
+Internal management API.
+
+Responsibilities:
+
+- Provider configuration.
+- Provider health.
+- Provider availability.
+
+External applications should not directly access providers.
+
+---
+
+# 9. Request Structure
+
+Standard request metadata:
+
+```json
+{
+  "requestId": "unique-id",
+  "applicationId": "app-id",
+  "projectId": "project-id",
+  "timestamp": "date"
+}
+```
+
+---
+
+# 10. Response Structure
+
+All APIs return a consistent format.
+
+Success:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "metadata": {}
+}
+```
+
+Failure:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Description"
+  }
+}
+```
+
+---
+
+# 11. Streaming Support
+
+AI responses may require streaming.
+
+Supported methods:
+
+- Server Sent Events (SSE)
+- WebSocket
+
+Streaming use cases:
+
+- Chat responses.
+- Long workflows.
+- Agent progress.
+- Tool execution updates.
+
+---
+
+# 12. Error Handling
+
+Standard error categories:
+
+```
+AUTH_ERROR
+
+VALIDATION_ERROR
+
+PERMISSION_ERROR
+
+NOT_FOUND
+
+PROVIDER_ERROR
+
+TOOL_ERROR
+
+WORKFLOW_ERROR
+
+INTERNAL_ERROR
+```
+
+Errors must include:
+
+- Error code.
+- Message.
+- Request ID.
+- Timestamp.
+
+---
+
+# 13. Rate Limiting
+
+API protection includes:
+
+- Request limits.
+- Token limits.
+- Application quotas.
+- Abuse prevention.
+
+Limits should be configurable.
+
+---
+
+# 14. Observability
+
+Every request should generate:
+
+- Request ID.
+- Execution trace.
+- Latency metrics.
+- Provider usage.
+- Error information.
+
+Logs must allow debugging across the complete execution chain.
+
+---
+
+# 15. OpenAPI Documentation
+
+The API must maintain an OpenAPI specification.
+
+Benefits:
+
+- Automatic documentation.
+- SDK generation.
+- API testing.
+- Client integration.
+
+---
+
+# 16. Backward Compatibility
+
+API evolution follows:
+
+- Additive changes preferred.
+- Deprecated features maintained temporarily.
+- Breaking changes require version upgrades.
+
+---
+
+# 17. Security Requirements
+
+The API must enforce:
+
+- Authentication.
+- Authorization.
+- Input validation.
+- Rate limiting.
+- Secure headers.
+- Audit logging.
+
+---
+
+# 18. Future Enhancements
+
+Future API capabilities:
+
+- GraphQL gateway.
+- Event streaming.
+- Webhook support.
+- External developer portal.
+- API marketplace.
+- Real-time collaboration.
+
+---
+
+# 19. Related Documents
+
+- sdk.md
+- security.md
+- provider-system.md
+- workflow-engine.md
+- agent-framework.md
+- database.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\database.md
+=========================================================
+
+# Database Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Database Architecture defines how Agentic AI OS stores, organizes, and manages persistent information.
+
+The database layer provides reliable storage for platform entities while maintaining separation between modules.
+
+The architecture must support future expansion without requiring fundamental redesign.
+
+---
+
+# 2. Database Goals
+
+The database system must provide:
+
+- Reliable persistence.
+- Modular data ownership.
+- Efficient querying.
+- Semantic search support.
+- Transaction consistency.
+- Scalability.
+- Migration support.
+- Strong security boundaries.
+
+---
+
+# 3. Database Technology
+
+Initial database stack:
+
+Primary Database:
+
+```
+PostgreSQL
+```
+
+Extensions:
+
+```
+pgvector
+```
+
+Purpose:
+
+- Relational data storage.
+- Structured queries.
+- Vector similarity search.
+- Transaction management.
+
+---
+
+# 4. Database Principles
+
+The database follows these principles:
+
+- Modules own their data.
+- Data access occurs through services.
+- Direct cross-module database access should be avoided.
+- Schema changes require migrations.
+- Sensitive data requires protection.
+- Database design follows domain boundaries.
+
+---
+
+# 5. High-Level Database Architecture
+
+```
+                    Agentic AI OS
+
+                         │
+
+                    Database Layer
+
+                         │
+
+    ┌────────────┬────────────┬────────────┐
+
+    ▼            ▼            ▼            ▼
+
+ Identity     Agents      Memory      Knowledge
+
+
+    ▼            ▼            ▼            ▼
+
+
+ Projects    Workflows   Executions   Analytics
+
+```
+
+---
+
+# 6. Core Database Domains
+
+The database is divided conceptually into domains.
+
+---
+
+# Identity Domain
+
+Responsible for:
+
+- Users
+- Authentication
+- Roles
+- Permissions
+- API credentials
+
+Example entities:
+
+```
+users
+
+roles
+
+permissions
+
+api_keys
+```
+
+---
+
+# Application Domain
+
+Responsible for registered client applications.
+
+Examples:
+
+- Home
+- Bakery
+- Sewa Bazaar
+- External applications
+
+Example entities:
+
+```
+applications
+
+projects
+
+application_settings
+```
+
+---
+
+# Agent Domain
+
+Stores agent definitions.
+
+Example entities:
+
+```
+agents
+
+agent_versions
+
+agent_capabilities
+```
+
+---
+
+# Memory Domain
+
+Stores persistent memory information.
+
+Example entities:
+
+```
+memories
+
+memory_entries
+
+memory_embeddings
+```
+
+Detailed design is defined in:
+
+```
+memory-system.md
+```
+
+---
+
+# Knowledge Domain
+
+Stores knowledge metadata and retrieval information.
+
+Example entities:
+
+```
+documents
+
+document_chunks
+
+embeddings
+
+knowledge_sources
+```
+
+Detailed design is defined in:
+
+```
+knowledge-engine.md
+```
+
+---
+
+# Workflow Domain
+
+Stores workflow definitions and executions.
+
+Example entities:
+
+```
+workflows
+
+workflow_steps
+
+workflow_runs
+
+workflow_events
+```
+
+---
+
+# Execution Domain
+
+Tracks AI operations.
+
+Example entities:
+
+```
+requests
+
+executions
+
+execution_logs
+
+usage_metrics
+```
+
+---
+
+# 7. Schema Organization
+
+The database should logically separate domains.
+
+Possible structure:
+
+```
+public
+
+auth
+
+agents
+
+memory
+
+knowledge
+
+workflows
+
+analytics
+```
+
+The exact implementation may evolve after Phase 1 evaluation.
+
+---
+
+# 8. Migration Strategy
+
+All schema changes must use migrations.
+
+Requirements:
+
+- Version controlled migrations.
+- Repeatable deployment.
+- Rollback capability.
+- Environment consistency.
+
+Migration tools may include:
+
+- Prisma Migrate
+- Drizzle migrations
+- Knex migrations
+- Custom migration system
+
+Final selection will happen during implementation.
+
+---
+
+# 9. Vector Storage
+
+The platform uses pgvector for:
+
+- Memory embeddings.
+- Knowledge embeddings.
+- Semantic search.
+
+Vector data should remain associated with:
+
+- Original source.
+- Namespace.
+- Permissions.
+- Metadata.
+
+Vectors must never exist without traceable source information.
+
+---
+
+# 10. Multi-Tenant Considerations
+
+Although initial deployment may support personal projects, architecture should support multiple applications.
+
+Isolation strategies:
+
+- Application ID separation.
+- Project namespaces.
+- Permission filtering.
+- Database-level policies.
+
+---
+
+# 11. Database Access Layer
+
+Applications and modules should not directly access database tables.
+
+Preferred flow:
+
+```
+Module
+
+↓
+
+Service Layer
+
+↓
+
+Repository Layer
+
+↓
+
+Database
+```
+
+Benefits:
+
+- Easier testing.
+- Replaceable database logic.
+- Cleaner boundaries.
+
+---
+
+# 12. Data Validation
+
+Database protection exists at multiple levels:
+
+Application Layer:
+
+- Zod validation.
+- Business rules.
+
+Database Layer:
+
+- Constraints.
+- Foreign keys.
+- Indexes.
+- Unique rules.
+
+Both layers are required.
+
+---
+
+# 13. Indexing Strategy
+
+Indexes should support:
+
+- Frequent queries.
+- Search operations.
+- Foreign keys.
+- Time-based filtering.
+
+Examples:
+
+```
+created_at
+
+user_id
+
+application_id
+
+project_id
+
+namespace_id
+```
+
+Indexing decisions should be based on actual usage patterns.
+
+---
+
+# 14. Backup Strategy
+
+Production environments require:
+
+- Automated backups.
+- Recovery procedures.
+- Backup testing.
+
+Development environments may use:
+
+- Local database dumps.
+- Managed database snapshots.
+
+---
+
+# 15. Security
+
+Database security includes:
+
+- Encrypted connections.
+- Credential protection.
+- Least privilege access.
+- Sensitive field protection.
+- Audit logging.
+
+Database credentials must never be stored in source control.
+
+---
+
+# 16. Performance Considerations
+
+Future optimization areas:
+
+- Connection pooling.
+- Query optimization.
+- Read replicas.
+- Caching.
+- Partitioning.
+
+Performance improvements should be introduced only when required.
+
+---
+
+# 17. Future Enhancements
+
+Possible future capabilities:
+
+- Distributed database architecture.
+- Dedicated vector database.
+- Data warehouse.
+- Event sourcing.
+- Real-time analytics storage.
+
+---
+
+# 18. Related Documents
+
+- memory-system.md
+- knowledge-engine.md
+- api-spec.md
+- security.md
+- workflow-engine.md
+- agent-framework.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\memory-system.md
+=========================================================
+
+# Memory System
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Memory System provides persistent intelligence for Agentic AI OS.
+
+Its responsibility is to capture, organize, retrieve, and maintain information across conversations, workflows, agents, projects, and applications.
+
+Unlike traditional chat history, the Memory System enables the platform to remember relevant information over time while remaining secure, scalable, and context-aware.
+
+The Memory System is a core platform capability and must remain independent of AI providers.
+
+---
+
+# 2. Objectives
+
+The Memory System must:
+
+- Store information across sessions.
+- Support multiple memory types.
+- Enable semantic retrieval.
+- Provide contextual memory.
+- Isolate memory between projects.
+- Support multiple applications.
+- Maintain high retrieval performance.
+- Support future AI capabilities.
+- Remain provider independent.
+
+---
+
+# 3. Design Principles
+
+The Memory System follows these principles:
+
+- Memory is contextual.
+- Memory is isolated.
+- Memory is searchable.
+- Memory is versionable.
+- Memory is secure.
+- Memory is extensible.
+- Memory is provider agnostic.
+- Memory retrieval should prioritize relevance over recency.
+
+---
+
+# 4. Memory Architecture
+
+```
+                Core Orchestrator
+                        │
+                        ▼
+                Memory Engine
+                        │
+      ┌─────────────────┼─────────────────┐
+      │                 │                 │
+      ▼                 ▼                 ▼
+
+ Memory Store    Retrieval Engine   Indexing Engine
+
+      │                 │                 │
+
+      ▼                 ▼                 ▼
+
+ PostgreSQL        pgvector         Embedding Service
+```
+
+The Memory Engine acts as the single entry point for all memory operations.
+
+---
+
+# 5. Memory Types
+
+The platform supports multiple categories of memory.
+
+## Conversation Memory
+
+Maintains the active conversation context.
+
+Characteristics:
+
+- Temporary
+- Session-based
+- High priority
+- Frequently accessed
+
+---
+
+## Short-Term Memory
+
+Stores recent information relevant to ongoing tasks.
+
+Examples:
+
+- Current workflow state
+- Recent user actions
+- Temporary planning data
+
+---
+
+## Long-Term Memory
+
+Stores durable information across sessions.
+
+Examples:
+
+- User preferences
+- Persistent project knowledge
+- Historical interactions
+- Learned information
+
+---
+
+## Semantic Memory
+
+Stores meaning rather than conversation history.
+
+Examples:
+
+- Concepts
+- Facts
+- Relationships
+- Knowledge graphs
+
+---
+
+## Project Memory
+
+Stores information specific to one project.
+
+Each project has an isolated memory namespace.
+
+Examples:
+
+- Home
+- Bakery
+- CRM
+- Story Studio
+
+Project memory must never leak into other projects.
+
+---
+
+## Knowledge Memory
+
+Stores indexed documents and structured knowledge.
+
+Examples:
+
+- PDFs
+- Documentation
+- Manuals
+- Notes
+- Articles
+- Research
+
+---
+
+# 6. Memory Namespaces
+
+Every memory belongs to a namespace.
+
+Examples:
+
+```
+Global
+
+Home
+
+Bakery
+
+CRM
+
+StoryStudio
+
+Project123
+
+UserABC
+```
+
+Namespaces ensure complete isolation between applications and users.
+
+---
+
+# 7. Memory Lifecycle
+
+Memory follows this lifecycle.
+
+```
+Capture
+
+↓
+
+Validate
+
+↓
+
+Classify
+
+↓
+
+Index
+
+↓
+
+Store
+
+↓
+
+Retrieve
+
+↓
+
+Update
+
+↓
+
+Archive
+
+↓
+
+Delete
+```
+
+Not every memory follows every stage.
+
+---
+
+# 8. Memory Storage Strategy
+
+Different memory types require different storage mechanisms.
+
+| Memory Type | Storage |
+|-------------|---------|
+| Conversation | PostgreSQL |
+| Short-Term | PostgreSQL / Redis |
+| Long-Term | PostgreSQL |
+| Semantic | PostgreSQL + pgvector |
+| Knowledge | PostgreSQL + pgvector |
+| Metadata | PostgreSQL |
+
+The storage implementation may evolve without affecting the Memory Engine interface.
+
+---
+
+# 9. Embedding Strategy
+
+Semantic retrieval requires embeddings.
+
+The Memory System supports pluggable embedding providers.
+
+Possible providers include:
+
+- OpenAI
+- Gemini
+- Local embedding models
+- Ollama
+- Future embedding providers
+
+Embedding generation must remain independent from memory storage.
+
+---
+
+# 10. Retrieval Process
+
+Memory retrieval follows this sequence.
+
+1. Receive retrieval request.
+2. Determine namespace.
+3. Determine memory type.
+4. Apply permissions.
+5. Execute semantic search.
+6. Rank results.
+7. Apply relevance filtering.
+8. Return normalized memory objects.
+
+---
+
+# 11. Memory Ranking
+
+Retrieved memories should be ranked using multiple signals.
+
+Examples:
+
+- Semantic similarity
+- Importance
+- Recency
+- Frequency
+- User preference
+- Project relevance
+- Workflow relevance
+
+Ranking strategies should remain configurable.
+
+---
+
+# 12. Memory Expiration
+
+Not all memories are permanent.
+
+Possible expiration policies include:
+
+- Session end
+- Time-to-live
+- Manual deletion
+- Project deletion
+- Archive policy
+
+Long-term memory should never expire automatically unless explicitly configured.
+
+---
+
+# 13. Memory Updates
+
+Existing memories may be:
+
+- Updated
+- Merged
+- Split
+- Archived
+- Replaced
+- Deleted
+
+The update strategy should preserve consistency and auditability.
+
+---
+
+# 14. Security
+
+Every memory operation must enforce:
+
+- Authentication
+- Authorization
+- Namespace isolation
+- Audit logging
+- Encryption at rest
+- Encryption in transit
+
+Applications may access only authorized memory namespaces.
+
+---
+
+# 15. Performance
+
+The Memory System should optimize for:
+
+- Low retrieval latency
+- Fast semantic search
+- Efficient indexing
+- Incremental updates
+- Scalable storage
+- Background indexing
+
+---
+
+# 16. Observability
+
+Every memory operation should generate metrics.
+
+Examples include:
+
+- Retrieval latency
+- Storage latency
+- Indexing duration
+- Embedding generation time
+- Search accuracy
+- Cache hit rate
+- Namespace usage
+
+---
+
+# 17. Future Enhancements
+
+The architecture should support future capabilities including:
+
+- Automatic memory summarization.
+- Memory importance scoring.
+- Relationship graphs.
+- Cross-memory reasoning.
+- Memory compression.
+- Intelligent forgetting.
+- User-controlled memory management.
+- Hybrid vector search.
+- Multi-modal memory.
+
+These enhancements should extend the existing architecture without requiring structural redesign.
+
+---
+
+# 18. Related Documents
+
+- 02-high-level-architecture.md
+- provider-system.md
+- workflow-engine.md
+- agent-framework.md
+- database.md
+- api-spec.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\provider-system.md
+=========================================================
+
+# Provider System
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Provider System is responsible for abstracting all external AI providers behind a unified interface.
+
+Applications and internal platform modules must never communicate directly with provider-specific SDKs or APIs.
+
+This abstraction ensures provider independence, simplifies maintenance, enables failover strategies, and allows new providers to be introduced without modifying business logic.
+
+---
+
+# 2. Objectives
+
+The Provider System must:
+
+- Hide provider-specific implementations.
+- Expose a consistent interface.
+- Normalize requests.
+- Normalize responses.
+- Handle authentication.
+- Support streaming.
+- Support multimodal models.
+- Support future providers.
+- Support retries and failover.
+- Collect provider metrics.
+- Remain independent from application logic.
+
+---
+
+# 3. Design Principles
+
+The Provider System follows these principles:
+
+- Provider agnostic.
+- Interface driven.
+- Replaceable implementations.
+- Configuration based.
+- Extensible.
+- Testable.
+- Observable.
+- Secure.
+
+---
+
+# 4. Responsibilities
+
+The Provider System is responsible for:
+
+- Provider registration.
+- Provider discovery.
+- Provider configuration.
+- Authentication.
+- Request transformation.
+- Response normalization.
+- Streaming management.
+- Token accounting.
+- Error normalization.
+- Retry handling.
+- Failover execution.
+- Usage metrics.
+
+The Provider System is **not** responsible for:
+
+- Memory
+- Workflow execution
+- Tool execution
+- Prompt generation
+- Agent orchestration
+
+---
+
+# 5. Supported Providers
+
+The initial architecture supports:
+
+- OpenAI
+- Google Gemini
+- Anthropic Claude
+- Ollama
+- OpenRouter
+
+Future providers may include:
+
+- Azure OpenAI
+- AWS Bedrock
+- Mistral
+- Groq
+- DeepSeek
+- xAI
+- Together AI
+- Cohere
+- Custom Local Models
+
+No architectural changes should be required when introducing additional providers.
+
+---
+
+# 6. Provider Architecture
+
+```
+                Core Orchestrator
+                       │
+                       ▼
+               Provider Engine
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+
+ OpenAI Provider   Gemini Provider   Claude Provider
+
+        ▼              ▼              ▼
+
+ Provider APIs / SDKs
+```
+
+Every provider implements the same contract.
+
+---
+
+# 7. Provider Interface
+
+Every provider implementation must expose identical capabilities.
+
+The interface includes support for:
+
+- Chat completion
+- Streaming
+- Embeddings
+- Vision
+- Image understanding
+- Structured output
+- Function calling
+- Model discovery
+- Health checks
+
+Provider-specific features should remain optional extensions and must never affect the common interface.
+
+---
+
+# 8. Provider Registration
+
+Providers are registered during application startup.
+
+Each provider includes:
+
+- Identifier
+- Display name
+- Supported models
+- Supported capabilities
+- Authentication method
+- Configuration
+- Health status
+
+The Provider Engine maintains the active provider registry.
+
+---
+
+# 9. Model Registry
+
+Each provider exposes one or more models.
+
+Every model contains metadata describing:
+
+- Model identifier
+- Context window
+- Maximum output
+- Vision support
+- Image generation support
+- Embedding support
+- Audio support
+- Function calling support
+- Structured output support
+- Streaming support
+- Availability status
+
+The registry enables intelligent model selection without exposing provider-specific details.
+
+---
+
+# 10. Request Lifecycle
+
+A request follows this sequence.
+
+1. Receive normalized request.
+2. Validate request.
+3. Select provider.
+4. Select model.
+5. Transform request.
+6. Authenticate.
+7. Execute request.
+8. Normalize response.
+9. Record metrics.
+10. Return normalized response.
+
+---
+
+# 11. Provider Selection Strategy
+
+Provider selection may be determined by:
+
+- Explicit application configuration.
+- Project configuration.
+- User preference.
+- Required capabilities.
+- Cost policies.
+- Performance policies.
+- Availability.
+- Failover rules.
+
+The selection strategy is configurable.
+
+---
+
+# 12. Failover Strategy
+
+When a provider becomes unavailable:
+
+1. Detect failure.
+2. Record metrics.
+3. Evaluate retry policy.
+4. Attempt retry if appropriate.
+5. Select backup provider.
+6. Resume execution.
+7. Return normalized response.
+
+Failover should remain transparent whenever possible.
+
+---
+
+# 13. Streaming Support
+
+The Provider System must support streaming responses.
+
+Streaming responsibilities include:
+
+- Opening streams.
+- Token forwarding.
+- Partial response handling.
+- Stream cancellation.
+- Error recovery.
+- Completion events.
+
+Applications receive a consistent streaming interface regardless of provider.
+
+---
+
+# 14. Capability Detection
+
+Every provider advertises supported capabilities.
+
+Examples include:
+
+- Chat
+- Vision
+- Embeddings
+- Audio
+- OCR
+- Image generation
+- Function calling
+- Structured output
+
+The platform uses these capabilities when selecting providers.
+
+---
+
+# 15. Response Normalization
+
+Every provider returns different response formats.
+
+The Provider System converts them into a unified platform response.
+
+Applications never receive provider-native responses.
+
+This ensures consistent behavior across all integrations.
+
+---
+
+# 16. Error Normalization
+
+Provider-specific errors are converted into standardized platform errors.
+
+Examples include:
+
+- Authentication failure
+- Rate limiting
+- Timeout
+- Invalid request
+- Unsupported capability
+- Provider unavailable
+- Internal provider error
+
+Applications should never depend on provider-specific error formats.
+
+---
+
+# 17. Security
+
+The Provider System is responsible for:
+
+- Secure API key storage.
+- Secret isolation.
+- HTTPS communication.
+- Credential validation.
+- Request signing when required.
+- Secure logging.
+
+Provider credentials must never be exposed outside the Provider Engine.
+
+---
+
+# 18. Observability
+
+Every provider interaction should record:
+
+- Request ID
+- Provider
+- Model
+- Latency
+- Success status
+- Failure reason
+- Token usage
+- Retry count
+- Streaming duration
+
+These metrics support monitoring and optimization.
+
+---
+
+# 19. Future Enhancements
+
+Future capabilities may include:
+
+- Automatic provider benchmarking.
+- Intelligent model routing.
+- Cost optimization.
+- Load balancing.
+- Geographic routing.
+- A/B model testing.
+- Automatic fallback chains.
+- Provider health dashboards.
+
+These features should extend the existing architecture without breaking existing interfaces.
+
+---
+
+# 20. Related Documents
+
+- 02-high-level-architecture.md
+- memory-system.md
+- workflow-engine.md
+- api-spec.md
+- sdk.md
+- security.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\tool-engine.md
+=========================================================
+
+# Tool Engine
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Tool Engine provides a unified framework for executing external capabilities within Agentic AI OS.
+
+Rather than embedding tool-specific logic throughout the platform, every tool is managed through a common execution engine.
+
+The Tool Engine enables agents and workflows to safely interact with external systems while remaining independent of implementation details.
+
+---
+
+# 2. Objectives
+
+The Tool Engine must:
+
+- Standardize tool execution.
+- Support pluggable tools.
+- Enforce permissions.
+- Validate inputs.
+- Normalize outputs.
+- Handle failures.
+- Support synchronous execution.
+- Support asynchronous execution.
+- Support future MCP integrations.
+- Remain provider independent.
+
+---
+
+# 3. Design Principles
+
+The Tool Engine follows these principles.
+
+- Every tool performs one responsibility.
+- Tools are independently deployable.
+- Tools communicate through interfaces.
+- Tool execution is observable.
+- Tool execution is secure.
+- Tools are reusable.
+- Tool registration is dynamic.
+- Tool implementations remain isolated.
+
+---
+
+# 4. Tool Architecture
+
+```
+                 Workflow Engine
+                        │
+                        ▼
+                 Agent Framework
+                        │
+                        ▼
+                  Tool Engine
+                        │
+      ┌─────────────────┼─────────────────┐
+      │                 │                 │
+
+ Tool Registry   Tool Executor   Permission Manager
+
+      │                 │                 │
+
+      ▼                 ▼                 ▼
+
+Registered Tools
+```
+
+---
+
+# 5. Responsibilities
+
+The Tool Engine is responsible for:
+
+- Tool discovery
+- Tool registration
+- Tool execution
+- Permission enforcement
+- Input validation
+- Output normalization
+- Error handling
+- Metrics collection
+- Execution logging
+
+The Tool Engine is not responsible for:
+
+- AI inference
+- Workflow planning
+- Memory management
+- Knowledge retrieval
+
+---
+
+# 6. Tool Categories
+
+The platform supports multiple tool categories.
+
+## File Tools
+
+Examples:
+
+- Read files
+- Write files
+- Move files
+- Delete files
+- Search files
+
+---
+
+## Database Tools
+
+Examples:
+
+- Query database
+- Insert records
+- Update records
+- Delete records
+
+---
+
+## Search Tools
+
+Examples:
+
+- Web search
+- Internal search
+- Document search
+- Semantic search
+
+---
+
+## Document Tools
+
+Examples:
+
+- PDF processing
+- OCR
+- Text extraction
+- Metadata extraction
+
+---
+
+## Image Tools
+
+Examples:
+
+- Image analysis
+- Image metadata
+- Image transformation
+- Vision processing
+
+---
+
+## Audio Tools
+
+Examples:
+
+- Speech-to-text
+- Audio analysis
+- Audio metadata
+
+---
+
+## Communication Tools
+
+Examples:
+
+- Email
+- SMS
+- Notifications
+- Messaging
+
+---
+
+## Calendar Tools
+
+Examples:
+
+- Create events
+- Update events
+- Delete events
+- Availability lookup
+
+---
+
+## Storage Tools
+
+Examples:
+
+- Local storage
+- Dropbox
+- Google Drive
+- S3-compatible storage
+
+---
+
+## Future Tool Categories
+
+Examples:
+
+- MCP Tools
+- Robotics
+- IoT
+- Browser automation
+- Enterprise systems
+
+---
+
+# 7. Tool Registration
+
+Every tool must register itself with the Tool Registry.
+
+Each registration includes:
+
+- Identifier
+- Name
+- Description
+- Category
+- Version
+- Permissions
+- Configuration
+- Status
+- Supported operations
+
+The registry enables dynamic discovery without hardcoded references.
+
+---
+
+# 8. Tool Interface
+
+Every tool must expose a common interface.
+
+Each tool should support:
+
+- Initialization
+- Validation
+- Execution
+- Cleanup
+- Health check
+
+Additional capabilities may be implemented without affecting the common interface.
+
+---
+
+# 9. Tool Lifecycle
+
+Every tool follows this lifecycle.
+
+```
+Registered
+
+↓
+
+Initialized
+
+↓
+
+Validated
+
+↓
+
+Executing
+
+↓
+
+Completed
+
+↓
+
+Released
+```
+
+Alternative states include:
+
+- Failed
+- Cancelled
+- Timed Out
+- Disabled
+
+---
+
+# 10. Execution Flow
+
+Tool execution follows this sequence.
+
+1. Receive execution request.
+2. Verify permissions.
+3. Validate inputs.
+4. Resolve tool.
+5. Execute operation.
+6. Normalize result.
+7. Record metrics.
+8. Return response.
+
+---
+
+# 11. Input Validation
+
+Every execution request must validate:
+
+- Required parameters
+- Parameter types
+- Parameter ranges
+- Permissions
+- Namespace
+- Configuration
+
+Invalid requests must be rejected before execution.
+
+---
+
+# 12. Output Normalization
+
+Every tool returns a standardized response.
+
+Responses should include:
+
+- Execution status
+- Output data
+- Metadata
+- Execution time
+- Errors
+- Warnings
+
+Applications must never depend on tool-specific output formats.
+
+---
+
+# 13. Permission Model
+
+Every tool declares its required permissions.
+
+Examples:
+
+- Read files
+- Write files
+- Delete files
+- Internet access
+- Database access
+- Email sending
+- Calendar access
+
+The Permission Manager validates authorization before execution.
+
+---
+
+# 14. Security
+
+Security principles include:
+
+- Least privilege
+- Secure defaults
+- Input sanitization
+- Output validation
+- Audit logging
+- Namespace isolation
+- Secret protection
+
+Tool implementations must never expose sensitive credentials.
+
+---
+
+# 15. Error Handling
+
+Tool failures include:
+
+- Validation errors
+- Permission errors
+- Timeout errors
+- Network failures
+- Configuration errors
+- Internal failures
+
+All errors are normalized before leaving the Tool Engine.
+
+---
+
+# 16. Observability
+
+Every execution records:
+
+- Tool ID
+- Tool Version
+- Workflow ID
+- Agent ID
+- Request ID
+- Execution duration
+- Success status
+- Failure reason
+- Resource usage
+
+These metrics support monitoring and optimization.
+
+---
+
+# 17. Performance
+
+The Tool Engine should support:
+
+- Concurrent execution
+- Background execution
+- Queue-based execution
+- Result caching
+- Connection pooling
+- Resource limits
+
+Performance optimizations must remain transparent to callers.
+
+---
+
+# 18. MCP Compatibility
+
+The Tool Engine is designed to support the Model Context Protocol (MCP).
+
+Future MCP integrations should behave like native tools.
+
+The Tool Engine remains the single execution layer regardless of whether a tool is local, remote, or MCP-based.
+
+---
+
+# 19. Future Enhancements
+
+The architecture supports future capabilities including:
+
+- Dynamic tool installation.
+- Tool versioning.
+- Tool dependency management.
+- Marketplace integration.
+- Remote execution.
+- Distributed tool workers.
+- Tool scheduling.
+- Tool chaining.
+- AI-generated tools.
+
+These capabilities should extend the architecture without structural redesign.
+
+---
+
+# 20. Related Documents
+
+- 02-high-level-architecture.md
+- workflow-engine.md
+- agent-framework.md
+- provider-system.md
+- memory-system.md
+- api-spec.md
+- security.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\workflow-engine.md
+=========================================================
+
+# Workflow Engine
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Workflow Engine is responsible for planning, coordinating, executing, monitoring, and managing multi-step tasks within Agentic AI OS.
+
+Rather than executing isolated AI requests, the Workflow Engine enables the platform to solve complex problems through structured execution pipelines.
+
+It provides a reusable execution framework that can coordinate providers, memory, tools, agents, and future platform capabilities.
+
+---
+
+# 2. Objectives
+
+The Workflow Engine must:
+
+- Execute multi-step workflows.
+- Support sequential and parallel execution.
+- Coordinate multiple platform modules.
+- Handle retries and failures.
+- Resume interrupted workflows.
+- Support checkpoints.
+- Maintain execution history.
+- Enable future distributed execution.
+
+---
+
+# 3. Design Principles
+
+The Workflow Engine follows these principles:
+
+- Workflows are deterministic where possible.
+- Every workflow is resumable.
+- Every step is observable.
+- Steps are isolated.
+- Workflows are provider independent.
+- Workflows are reusable.
+- Execution is auditable.
+- Recovery is built into the architecture.
+
+---
+
+# 4. Workflow Architecture
+
+```
+               Core Orchestrator
+                       │
+                       ▼
+               Workflow Engine
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+
+     Planner      Executor      Reviewer
+
+        │              │              │
+
+        ▼              ▼              ▼
+
+ Reflection     Retry Engine    Checkpoints
+```
+
+The Workflow Engine coordinates execution while individual modules remain responsible for their own business logic.
+
+---
+
+# 5. Workflow Components
+
+## Planner
+
+Responsible for:
+
+- Understanding objectives.
+- Creating execution plans.
+- Breaking tasks into steps.
+- Identifying dependencies.
+
+---
+
+## Executor
+
+Responsible for:
+
+- Executing workflow steps.
+- Coordinating platform modules.
+- Collecting results.
+- Reporting progress.
+
+---
+
+## Reviewer
+
+Responsible for:
+
+- Evaluating outputs.
+- Detecting failures.
+- Identifying improvements.
+- Requesting corrections.
+
+---
+
+## Reflection Engine
+
+Responsible for:
+
+- Learning from execution.
+- Improving future workflows.
+- Recording observations.
+
+Reflection never modifies historical execution records.
+
+---
+
+## Retry Engine
+
+Responsible for:
+
+- Handling transient failures.
+- Executing retry policies.
+- Applying exponential backoff.
+- Recording retry history.
+
+---
+
+## Checkpoint Manager
+
+Responsible for:
+
+- Saving workflow state.
+- Restoring execution.
+- Supporting pause and resume.
+- Recovery after interruptions.
+
+---
+
+# 6. Workflow Lifecycle
+
+Every workflow follows this lifecycle.
+
+```
+Created
+
+↓
+
+Validated
+
+↓
+
+Planned
+
+↓
+
+Executing
+
+↓
+
+Waiting
+
+↓
+
+Reviewing
+
+↓
+
+Completed
+
+↓
+
+Archived
+```
+
+Alternative states include:
+
+- Failed
+- Cancelled
+- Timed Out
+- Paused
+- Retrying
+
+---
+
+# 7. Workflow Types
+
+The platform supports multiple workflow categories.
+
+Examples include:
+
+- Chat workflows
+- Research workflows
+- Planning workflows
+- Writing workflows
+- Analysis workflows
+- File processing workflows
+- Automation workflows
+- Multi-agent workflows
+
+Future workflow types should require no architectural changes.
+
+---
+
+# 8. Step Types
+
+Workflow steps may include:
+
+- AI execution
+- Tool execution
+- Memory retrieval
+- Knowledge retrieval
+- Agent execution
+- Conditional logic
+- Human approval
+- Delay
+- Event wait
+
+Each step owns a single responsibility.
+
+---
+
+# 9. Execution Strategy
+
+The engine supports:
+
+- Sequential execution
+- Parallel execution
+- Conditional branching
+- Loops
+- Nested workflows
+- Dynamic workflow generation
+
+Execution strategies are selected according to workflow requirements.
+
+---
+
+# 10. Failure Handling
+
+Possible failures include:
+
+- Provider failure
+- Tool failure
+- Timeout
+- Validation error
+- Network failure
+- Permission failure
+- Unexpected exceptions
+
+Failures should be isolated whenever possible.
+
+---
+
+# 11. Retry Strategy
+
+Retry behavior should support:
+
+- Immediate retry
+- Delayed retry
+- Exponential backoff
+- Maximum retry limits
+- Provider switching
+- Manual intervention
+
+Retry policies remain configurable.
+
+---
+
+# 12. Checkpoints
+
+Checkpoints capture workflow progress.
+
+Each checkpoint stores:
+
+- Current state
+- Completed steps
+- Pending steps
+- Intermediate outputs
+- Context
+- Metadata
+
+Checkpoints enable reliable recovery after interruptions.
+
+---
+
+# 13. Workflow Context
+
+Every workflow maintains its own execution context.
+
+The context may include:
+
+- User information
+- Project information
+- Memory references
+- Tool outputs
+- Agent outputs
+- Temporary variables
+- Configuration
+
+Workflow context is isolated from other workflows.
+
+---
+
+# 14. Event Integration
+
+Workflow events include:
+
+- WorkflowCreated
+- WorkflowStarted
+- StepStarted
+- StepCompleted
+- StepFailed
+- WorkflowPaused
+- WorkflowResumed
+- WorkflowCompleted
+- WorkflowFailed
+
+Events enable monitoring and future distributed execution.
+
+---
+
+# 15. Observability
+
+Each workflow records:
+
+- Workflow ID
+- Request ID
+- Execution duration
+- Current status
+- Step history
+- Retry count
+- Resource usage
+- Error details
+
+Every execution should be traceable from start to finish.
+
+---
+
+# 16. Security
+
+Workflow execution must enforce:
+
+- Authentication
+- Authorization
+- Namespace isolation
+- Secure tool execution
+- Audit logging
+
+Workflow permissions are inherited from the requesting application.
+
+---
+
+# 17. Future Enhancements
+
+The architecture supports future capabilities including:
+
+- Visual workflow builder.
+- Human approval workflows.
+- Scheduled workflows.
+- Distributed execution.
+- Workflow templates.
+- AI-assisted planning.
+- Workflow marketplace.
+- Cross-project workflows.
+- Autonomous long-running workflows.
+
+These capabilities should extend the architecture without requiring redesign.
+
+---
+
+# 18. Related Documents
+
+- 02-high-level-architecture.md
+- provider-system.md
+- memory-system.md
+- tool-engine.md
+- agent-framework.md
+- api-spec.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\agent-framework.md
+=========================================================
+
+# Agent Framework
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Agent Framework provides a standardized architecture for building intelligent, reusable, and extensible AI agents within Agentic AI OS.
+
+An agent represents a specialized software component capable of understanding objectives, reasoning about tasks, coordinating platform capabilities, and producing outcomes.
+
+Agents are built on a common foundation and remain independent from specific AI providers.
+
+---
+
+# 2. Objectives
+
+The Agent Framework must:
+
+- Standardize agent behavior.
+- Support specialized agents.
+- Coordinate workflows.
+- Access memory.
+- Retrieve knowledge.
+- Execute tools.
+- Collaborate with other agents.
+- Remain provider independent.
+- Support future agent types.
+
+---
+
+# 3. Design Principles
+
+The framework follows these principles.
+
+- Every agent has a single responsibility.
+- Every agent inherits common capabilities.
+- Agents communicate through interfaces.
+- Agents never access providers directly.
+- Agents remain stateless where practical.
+- Agents are reusable.
+- Agent behavior is observable.
+- Agents are independently testable.
+
+---
+
+# 4. Definition of an Agent
+
+An agent is an intelligent execution unit responsible for solving a specific category of problems.
+
+Agents may:
+
+- Reason
+- Plan
+- Retrieve memory
+- Retrieve knowledge
+- Execute tools
+- Delegate work
+- Produce outputs
+
+Agents do not own business logic.
+
+Business logic belongs to client applications.
+
+---
+
+# 5. Agent Architecture
+
+```
+                   Workflow Engine
+                          │
+                          ▼
+                   Agent Framework
+                          │
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+        ▼                 ▼                 ▼
+
+     Base Agent     Agent Registry     Agent Manager
+
+        │
+        ▼
+
+ Specialized Agents
+```
+
+---
+
+# 6. Base Agent
+
+Every agent inherits common capabilities from the Base Agent.
+
+The Base Agent provides:
+
+- Configuration
+- Lifecycle
+- Logging
+- Metrics
+- Memory access
+- Knowledge access
+- Tool access
+- Workflow access
+- Provider access through interfaces
+- Event publishing
+
+Every specialized agent extends this foundation.
+
+---
+
+# 7. Agent Lifecycle
+
+Every agent follows the same lifecycle.
+
+```
+Created
+
+↓
+
+Initialized
+
+↓
+
+Prepared
+
+↓
+
+Executing
+
+↓
+
+Waiting
+
+↓
+
+Completed
+
+↓
+
+Disposed
+```
+
+Alternative states include:
+
+- Failed
+- Cancelled
+- Paused
+- Retrying
+
+---
+
+# 8. Agent Responsibilities
+
+Agents may:
+
+- Understand objectives.
+- Break down tasks.
+- Select tools.
+- Retrieve memory.
+- Retrieve knowledge.
+- Generate outputs.
+- Review results.
+- Delegate subtasks.
+
+Agents must not:
+
+- Manage authentication.
+- Access databases directly.
+- Call providers directly.
+- Perform infrastructure operations.
+
+---
+
+# 9. Agent Context
+
+Every execution includes an isolated context.
+
+Context may contain:
+
+- User information
+- Project information
+- Memory references
+- Knowledge references
+- Workflow state
+- Tool outputs
+- Temporary variables
+
+Context is discarded after execution unless persisted intentionally.
+
+---
+
+# 10. Agent Registry
+
+The Agent Registry maintains information about available agents.
+
+Each registered agent contains:
+
+- Identifier
+- Name
+- Description
+- Capabilities
+- Supported tasks
+- Version
+- Status
+- Configuration
+
+The registry enables discovery without hardcoding implementations.
+
+---
+
+# 11. Agent Manager
+
+The Agent Manager is responsible for:
+
+- Creating agents.
+- Initializing agents.
+- Managing execution.
+- Monitoring status.
+- Releasing resources.
+
+The manager coordinates lifecycle events but does not perform agent reasoning.
+
+---
+
+# 12. Specialized Agents
+
+The initial platform may include:
+
+- Chat Agent
+- Research Agent
+- Planning Agent
+- Writing Agent
+- Coding Agent
+- Vision Agent
+- Review Agent
+- Memory Agent
+- Knowledge Agent
+- Tool Agent
+
+Additional agents may be introduced without changing the framework.
+
+---
+
+# 13. Multi-Agent Collaboration
+
+Complex workflows may require multiple agents.
+
+Example:
+
+Research Agent
+
+↓
+
+Planning Agent
+
+↓
+
+Writing Agent
+
+↓
+
+Review Agent
+
+Each agent contributes only within its area of expertise.
+
+No agent should assume another agent's responsibility.
+
+---
+
+# 14. Memory Integration
+
+Agents access memory through the Memory Engine.
+
+Possible operations include:
+
+- Retrieve memory.
+- Store memory.
+- Update memory.
+- Search memory.
+
+Agents never communicate directly with storage systems.
+
+---
+
+# 15. Knowledge Integration
+
+Agents retrieve knowledge through the Knowledge Engine.
+
+Examples include:
+
+- Documentation
+- PDFs
+- Research papers
+- Internal knowledge
+- External indexed content
+
+Knowledge retrieval remains independent from provider selection.
+
+---
+
+# 16. Tool Integration
+
+Agents execute tools through the Tool Engine.
+
+Examples include:
+
+- File tools
+- Database tools
+- OCR
+- Search
+- Calendar
+- Email
+- PDF processing
+
+Tool execution is controlled by permissions.
+
+---
+
+# 17. Workflow Integration
+
+Agents participate in workflows coordinated by the Workflow Engine.
+
+Agents do not control workflow execution.
+
+The Workflow Engine remains responsible for sequencing and orchestration.
+
+---
+
+# 18. Provider Integration
+
+Agents never communicate with providers directly.
+
+All provider interactions occur through the Provider Engine.
+
+This preserves provider independence throughout the platform.
+
+---
+
+# 19. Observability
+
+Every agent execution records:
+
+- Agent ID
+- Workflow ID
+- Request ID
+- Execution time
+- Provider used
+- Tools executed
+- Memory accesses
+- Errors
+- Outcome
+
+Observability enables debugging and performance analysis.
+
+---
+
+# 20. Security
+
+Agents operate within the permissions granted by the requesting application.
+
+Security includes:
+
+- Authorization
+- Namespace isolation
+- Tool permissions
+- Memory permissions
+- Audit logging
+
+Agents cannot elevate their privileges.
+
+---
+
+# 21. Future Enhancements
+
+The framework supports future capabilities including:
+
+- Autonomous agents.
+- Long-running agents.
+- Human-in-the-loop agents.
+- Agent learning.
+- Agent marketplaces.
+- Dynamic agent generation.
+- Hierarchical agent teams.
+- Swarm collaboration.
+- Cross-project agent orchestration.
+
+These enhancements should extend the framework without requiring architectural redesign.
+
+---
+
+# 22. Related Documents
+
+- 02-high-level-architecture.md
+- provider-system.md
+- workflow-engine.md
+- memory-system.md
+- tool-engine.md
+- knowledge-engine.md
+- api-spec.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\prompt-engine.md
+=========================================================
+
+# Prompt Engine
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Prompt Engine provides centralized management, composition, execution preparation, and version control for prompts used throughout Agentic AI OS.
+
+Prompts are treated as managed system assets rather than hardcoded strings inside application logic.
+
+The Prompt Engine enables consistent prompt management across agents, workflows, and applications while maintaining provider independence.
+
+---
+
+# 2. Objectives
+
+The Prompt Engine must:
+
+- Centralize prompt management.
+- Support reusable templates.
+- Support prompt versioning.
+- Separate prompts from code.
+- Enable prompt testing.
+- Support dynamic variables.
+- Maintain prompt history.
+- Enable future optimization.
+
+---
+
+# 3. Design Principles
+
+The Prompt Engine follows these principles:
+
+- Prompts are versioned assets.
+- Prompts are reusable.
+- Prompts are observable.
+- Prompts are independent from providers.
+- Prompt changes should not require code changes.
+- Every execution should be traceable.
+- Production prompts require controlled changes.
+
+---
+
+# 4. Why a Prompt Engine Exists
+
+Without a Prompt Engine, prompts become scattered across:
+
+- Agents
+- Workflows
+- Applications
+- Configuration files
+- Source code
+
+This creates problems:
+
+- Duplicate prompts
+- Inconsistent behavior
+- Difficult testing
+- No version history
+- Difficult optimization
+
+The Prompt Engine solves this by creating a centralized prompt management system.
+
+---
+
+# 5. Prompt Architecture
+
+```
+              Agent Framework
+
+                    │
+
+                    ▼
+
+              Prompt Engine
+
+                    │
+
+     ┌──────────────┼──────────────┐
+
+     ▼              ▼              ▼
+
+ Prompt Store   Template Engine   Version Manager
+
+                    │
+
+                    ▼
+
+            Provider Engine
+```
+
+---
+
+# 6. Core Components
+
+## Prompt Registry
+
+Responsible for managing available prompts.
+
+Stores:
+
+- Prompt identifier
+- Name
+- Description
+- Category
+- Version
+- Status
+- Owner
+
+---
+
+## Prompt Store
+
+Responsible for persistence.
+
+Stores:
+
+- Prompt content
+- Metadata
+- Variables
+- Versions
+- History
+
+---
+
+## Template Engine
+
+Responsible for dynamic prompt generation.
+
+Supports:
+
+- Variables
+- Context injection
+- Conditional sections
+- Formatting rules
+
+Example:
+
+```
+You are a {{agent_role}}.
+
+Your task is:
+
+{{task}}
+
+Context:
+
+{{context}}
+```
+
+---
+
+## Version Manager
+
+Responsible for:
+
+- Creating versions
+- Comparing versions
+- Activating versions
+- Rolling back changes
+
+Every production prompt execution must reference a specific version.
+
+---
+
+# 7. Prompt Types
+
+The platform supports different prompt categories.
+
+## System Prompts
+
+Define agent identity and behavior.
+
+Examples:
+
+- Research Agent system instructions
+- Coding Agent rules
+
+---
+
+## Task Prompts
+
+Define specific objectives.
+
+Examples:
+
+- Analyze document
+- Summarize content
+- Generate report
+
+---
+
+## Tool Prompts
+
+Define how agents interact with tools.
+
+Examples:
+
+- Search instructions
+- File operation rules
+
+---
+
+## Evaluation Prompts
+
+Used for:
+
+- Testing
+- Quality evaluation
+- Output comparison
+
+---
+
+# 8. Prompt Lifecycle
+
+A prompt follows this lifecycle:
+
+```
+Created
+
+↓
+
+Draft
+
+↓
+
+Reviewed
+
+↓
+
+Approved
+
+↓
+
+Active
+
+↓
+
+Deprecated
+
+↓
+
+Archived
+```
+
+---
+
+# 9. Prompt Execution Flow
+
+A prompt request follows this process:
+
+```
+Agent Request
+
+↓
+
+Prompt Lookup
+
+↓
+
+Version Selection
+
+↓
+
+Variable Injection
+
+↓
+
+Context Addition
+
+↓
+
+Final Prompt Creation
+
+↓
+
+Provider Execution
+```
+
+---
+
+# 10. Prompt Variables
+
+Prompts may receive variables from:
+
+- User input
+- Memory Engine
+- Knowledge Engine
+- Workflow Context
+- Agent Context
+- Application Configuration
+
+Variables must be validated before injection.
+
+---
+
+# 11. Prompt Context Management
+
+The Prompt Engine may combine:
+
+- System instructions
+- Agent instructions
+- User requests
+- Retrieved knowledge
+- Memory context
+- Workflow state
+
+The final prompt assembly must remain traceable.
+
+---
+
+# 12. Prompt Security
+
+The Prompt Engine must protect against:
+
+- Unauthorized modification
+- Prompt injection
+- Sensitive information leakage
+- Unsafe template execution
+
+Prompt access must follow permission rules.
+
+---
+
+# 13. Prompt Analytics
+
+The system should record:
+
+- Prompt version used
+- Agent using prompt
+- Provider used
+- Execution result
+- Token usage
+- Latency
+- Quality feedback
+
+This enables continuous improvement.
+
+---
+
+# 14. Prompt Evaluation
+
+Future evaluation capabilities include:
+
+- A/B testing
+- Human evaluation
+- Automated scoring
+- Regression testing
+- Quality comparison
+
+Prompt improvements should be measurable.
+
+---
+
+# 15. Integration With Agents
+
+Agents request prompts through the Prompt Engine.
+
+Agents do not store permanent prompts internally.
+
+Example:
+
+```
+Research Agent
+
+↓
+
+Request Research Prompt
+
+↓
+
+Prompt Engine
+
+↓
+
+Provider Execution
+```
+
+---
+
+# 16. Integration With Workflows
+
+Workflows may specify:
+
+- Required prompt
+- Prompt version
+- Variables
+- Execution rules
+
+Workflow definitions should reference prompts rather than contain large prompt bodies.
+
+---
+
+# 17. Integration With Providers
+
+The Prompt Engine does not communicate directly with AI providers.
+
+Flow:
+
+```
+Prompt Engine
+
+↓
+
+Agent / Workflow
+
+↓
+
+Provider Engine
+
+↓
+
+LLM Provider
+```
+
+---
+
+# 18. Future Enhancements
+
+Future capabilities include:
+
+- AI-assisted prompt optimization
+- Automatic prompt testing
+- Prompt marketplace
+- Prompt analytics dashboard
+- Prompt recommendation system
+- Self-improving prompt workflows
+
+---
+
+# 19. Related Documents
+
+- provider-system.md
+- agent-framework.md
+- workflow-engine.md
+- memory-system.md
+- knowledge-engine.md
+- api-spec.md
+- sdk.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\knowledge-engine.md
+=========================================================
+
+# Knowledge Engine
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Knowledge Engine provides information ingestion, processing, indexing, retrieval, and contextual knowledge access capabilities within Agentic AI OS.
+
+It enables agents and workflows to access external information sources while maintaining separation between stored knowledge and conversational memory.
+
+The Knowledge Engine is responsible for transforming raw information into structured, searchable knowledge.
+
+---
+
+# 2. Knowledge vs Memory
+
+Knowledge and Memory are separate platform capabilities.
+
+## Memory
+
+Represents information created through interaction.
+
+Examples:
+
+- User preferences
+- Previous conversations
+- Project context
+- Agent experiences
+
+---
+
+## Knowledge
+
+Represents information intentionally provided to the system.
+
+Examples:
+
+- Documents
+- PDFs
+- Books
+- Research papers
+- Websites
+- Manuals
+- Databases
+- Internal documentation
+
+---
+
+# 3. Objectives
+
+The Knowledge Engine must:
+
+- Import information from multiple sources.
+- Process different file formats.
+- Generate searchable representations.
+- Support semantic retrieval.
+- Provide relevant context to agents.
+- Maintain knowledge ownership.
+- Support permissions.
+- Remain provider independent.
+
+---
+
+# 4. Design Principles
+
+The Knowledge Engine follows these principles:
+
+- Knowledge is reusable.
+- Retrieval is context-aware.
+- Sources are traceable.
+- Information ownership is explicit.
+- Processing is asynchronous where possible.
+- Storage is independent from retrieval.
+- Providers are replaceable.
+- Security applies at every layer.
+
+---
+
+# 5. Knowledge Architecture
+
+```
+                Agent Framework
+
+                       │
+
+                       ▼
+
+               Knowledge Engine
+
+                       │
+
+        ┌──────────────┼──────────────┐
+
+        ▼              ▼              ▼
+
+   Ingestion      Processing     Retrieval
+
+        │              │              │
+
+        ▼              ▼              ▼
+
+   Documents     Embeddings      Search
+
+                       │
+
+                       ▼
+
+              PostgreSQL + pgvector
+```
+
+---
+
+# 6. Core Components
+
+## Knowledge Ingestion
+
+Responsible for receiving information.
+
+Sources may include:
+
+- File uploads
+- APIs
+- Cloud storage
+- Websites
+- Databases
+- External systems
+
+---
+
+## Document Processor
+
+Responsible for converting raw content into usable information.
+
+Responsibilities:
+
+- Text extraction
+- Metadata extraction
+- Content cleaning
+- Chunk preparation
+- Format normalization
+
+---
+
+## Indexing Engine
+
+Responsible for creating searchable representations.
+
+Responsibilities:
+
+- Generate embeddings
+- Store vectors
+- Create indexes
+- Update existing knowledge
+
+---
+
+## Retrieval Engine
+
+Responsible for finding relevant information.
+
+Responsibilities:
+
+- Semantic search
+- Keyword search
+- Hybrid search
+- Ranking
+- Context preparation
+
+---
+
+# 7. Supported Knowledge Sources
+
+Initial support:
+
+- Markdown files
+- Text files
+- PDFs
+- Documents
+- Images
+- Audio transcripts
+
+Future support:
+
+- Websites
+- Cloud drives
+- Databases
+- APIs
+- Enterprise systems
+
+---
+
+# 8. Knowledge Lifecycle
+
+Knowledge follows this lifecycle:
+
+```
+Created
+
+↓
+
+Imported
+
+↓
+
+Processed
+
+↓
+
+Indexed
+
+↓
+
+Available
+
+↓
+
+Retrieved
+
+↓
+
+Updated
+
+↓
+
+Archived
+
+↓
+
+Deleted
+```
+
+---
+
+# 9. Document Processing Pipeline
+
+A typical pipeline:
+
+```
+Raw Document
+
+↓
+
+Extraction
+
+↓
+
+Cleaning
+
+↓
+
+Chunking
+
+↓
+
+Embedding Generation
+
+↓
+
+Vector Storage
+
+↓
+
+Index Available
+```
+
+---
+
+# 10. Chunking Strategy
+
+Large documents must be divided into smaller sections.
+
+Chunking should consider:
+
+- Document structure
+- Paragraph boundaries
+- Semantic meaning
+- Token limits
+- Retrieval accuracy
+
+Chunking strategies must remain configurable.
+
+---
+
+# 11. Embedding System
+
+The Knowledge Engine uses embeddings for semantic retrieval.
+
+Embedding providers may include:
+
+- OpenAI
+- Gemini
+- Local models
+- Ollama
+- Future providers
+
+Embedding generation must be abstracted from storage and retrieval.
+
+---
+
+# 12. Retrieval Strategy
+
+Retrieval may use:
+
+- Semantic similarity
+- Keyword matching
+- Metadata filtering
+- Source filtering
+- Permission filtering
+- Ranking algorithms
+
+The retrieval system should return the most relevant context, not the largest amount of information.
+
+---
+
+# 13. Knowledge Namespaces
+
+Knowledge must support isolated namespaces.
+
+Examples:
+
+```
+Global Knowledge
+
+Home Project
+
+Bakery Project
+
+Company Knowledge
+
+User Knowledge
+```
+
+Knowledge must never leak across unauthorized namespaces.
+
+---
+
+# 14. Knowledge Metadata
+
+Every knowledge item should maintain metadata.
+
+Examples:
+
+- Source
+- Owner
+- Creation date
+- Update date
+- File type
+- Permissions
+- Namespace
+- Version
+
+Metadata improves retrieval and governance.
+
+---
+
+# 15. Integration With Agents
+
+Agents access knowledge through the Knowledge Engine.
+
+Agents may:
+
+- Search knowledge
+- Retrieve documents
+- Request context
+- Reference sources
+
+Agents never access knowledge storage directly.
+
+---
+
+# 16. Integration With Workflows
+
+Workflows may include knowledge steps.
+
+Examples:
+
+Research workflow:
+
+```
+User Question
+
+↓
+
+Research Agent
+
+↓
+
+Knowledge Retrieval
+
+↓
+
+Analysis
+
+↓
+
+Final Response
+```
+
+---
+
+# 17. Security
+
+Knowledge security includes:
+
+- Access control
+- Namespace isolation
+- Permission checks
+- Source validation
+- Audit logging
+
+Sensitive knowledge must never be exposed without authorization.
+
+---
+
+# 18. Observability
+
+Knowledge operations should record:
+
+- Ingestion time
+- Processing status
+- Indexing duration
+- Retrieval latency
+- Search quality
+- Source usage
+
+---
+
+# 19. Future Enhancements
+
+Future capabilities may include:
+
+- Knowledge graphs
+- Automatic summarization
+- Multi-modal knowledge
+- Web crawling
+- Enterprise connectors
+- Knowledge validation
+- Knowledge lifecycle automation
+- AI-generated documentation
+
+---
+
+# 20. Related Documents
+
+- memory-system.md
+- provider-system.md
+- workflow-engine.md
+- agent-framework.md
+- tool-engine.md
+- database.md
+- api-spec.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\security.md
+=========================================================
+
+# Security Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Security Architecture defines how Agentic AI OS protects users, applications, data, agents, tools, and platform resources.
+
+Security is a foundational capability of the platform and must be considered in every architectural decision.
+
+Agentic AI OS must provide secure AI capabilities without compromising modularity or extensibility.
+
+---
+
+# 2. Security Goals
+
+The security system must provide:
+
+- Authentication
+- Authorization
+- Data protection
+- Access control
+- Secure communication
+- Auditability
+- Secret management
+- Threat prevention
+
+---
+
+# 3. Security Principles
+
+Agentic AI OS follows these principles:
+
+## Least Privilege
+
+Every user, application, agent, and tool receives only the permissions required for its task.
+
+---
+
+## Defense in Depth
+
+Security controls exist at multiple layers:
+
+- API layer
+- Service layer
+- Database layer
+- Tool layer
+- Infrastructure layer
+
+---
+
+## Secure by Default
+
+New components should begin with restricted permissions.
+
+Access should be explicitly granted.
+
+---
+
+## Zero Trust
+
+Every request must be verified.
+
+No component should automatically trust another component.
+
+---
+
+## Separation of Responsibilities
+
+Security logic should remain independent from business logic.
+
+---
+
+# 4. Security Architecture
+
+```
+                 Client Application
+
+                         │
+
+                         ▼
+
+                  API Gateway
+
+                         │
+
+              Authentication Layer
+
+                         │
+
+              Authorization Layer
+
+                         │
+
+              Platform Services
+
+        ┌────────────┬────────────┐
+
+        ▼            ▼            ▼
+
+    Agents       Tools       Data
+
+```
+
+---
+
+# 5. Authentication System
+
+Authentication verifies identity.
+
+Supported methods:
+
+- JWT authentication
+- Refresh tokens
+- API keys
+- Service credentials
+
+---
+
+## JWT Authentication
+
+Used for:
+
+- User sessions
+- Dashboard access
+- API requests
+
+JWT tokens contain:
+
+- User identity
+- Permissions
+- Expiration information
+
+---
+
+## API Keys
+
+Used for:
+
+- External applications
+- SDK authentication
+- Service-to-service communication
+
+Examples:
+
+```
+Home Application
+
+Bakery Application
+
+External Developer Application
+```
+
+---
+
+# 6. Authorization System
+
+Authorization determines what an authenticated entity can access.
+
+The system evaluates:
+
+- User identity
+- Application identity
+- Project ownership
+- Resource permissions
+- Tool permissions
+
+---
+
+# 7. Permission Model
+
+Permissions should be granular.
+
+Examples:
+
+```
+memory.read
+
+memory.write
+
+knowledge.search
+
+knowledge.upload
+
+tool.execute
+
+workflow.run
+
+agent.execute
+```
+
+---
+
+# 8. Application Isolation
+
+Each connected application must have isolated resources.
+
+Example:
+
+```
+Home Application
+
+    |
+
+    Memory Namespace A
+
+
+Bakery Application
+
+    |
+
+    Memory Namespace B
+```
+
+Applications must never access each other's data without explicit permission.
+
+---
+
+# 9. Data Security
+
+Sensitive data includes:
+
+- User information
+- Conversations
+- Memories
+- Knowledge documents
+- API credentials
+- Provider keys
+
+Protection methods:
+
+- Encryption in transit
+- Encryption at rest
+- Access control
+- Data isolation
+- Audit logging
+
+---
+
+# 10. Secret Management
+
+Secrets include:
+
+- API keys
+- Database credentials
+- Provider credentials
+- Encryption keys
+
+Rules:
+
+- Never store secrets in source code.
+- Never expose secrets through logs.
+- Use environment variables during development.
+- Use secret managers in production.
+
+---
+
+# 11. Provider Security
+
+AI provider credentials must remain inside Agentic AI OS.
+
+Applications must never contain:
+
+```
+OpenAI API Key
+
+Gemini API Key
+
+Claude API Key
+```
+
+The correct architecture:
+
+```
+Application
+
+↓
+
+Agentic AI OS
+
+↓
+
+Provider Credentials
+
+↓
+
+AI Provider
+```
+
+---
+
+# 12. Tool Security
+
+Tools represent the highest-risk execution area.
+
+Tool security includes:
+
+- Permission checks
+- Input validation
+- Output filtering
+- Execution limits
+- Audit logs
+
+Examples:
+
+A file tool should not automatically have:
+
+```
+delete_all_files
+```
+
+permission.
+
+---
+
+# 13. Prompt Security
+
+The platform must protect against:
+
+- Prompt injection
+- Instruction manipulation
+- Data leakage
+- Unsafe prompt modification
+
+Controls include:
+
+- Input filtering
+- Context separation
+- Permission-aware retrieval
+- Prompt version control
+
+---
+
+# 14. Memory Security
+
+Memory must support:
+
+- User isolation
+- Application isolation
+- Namespace separation
+- Permission checks
+
+Agents must only retrieve memories they are authorized to access.
+
+---
+
+# 15. Knowledge Security
+
+Knowledge access requires:
+
+- Source permissions
+- Namespace validation
+- Retrieval filtering
+
+Example:
+
+Private company documents must not appear in public application searches.
+
+---
+
+# 16. Audit Logging
+
+Security-sensitive actions must be logged.
+
+Examples:
+
+- Login attempts
+- Permission changes
+- Tool execution
+- Data access
+- Provider usage
+- Configuration changes
+
+Logs should include:
+
+- Actor
+- Action
+- Resource
+- Timestamp
+- Result
+
+---
+
+# 17. API Security
+
+API protection includes:
+
+- Authentication
+- Authorization
+- Rate limiting
+- Request validation
+- Secure headers
+- CORS policies
+
+---
+
+# 18. Infrastructure Security
+
+Deployment security includes:
+
+- Container isolation
+- Environment separation
+- Secure networking
+- Dependency updates
+- Vulnerability monitoring
+
+---
+
+# 19. Development Security
+
+Development practices:
+
+- Code review
+- Dependency scanning
+- Secret scanning
+- Security testing
+- Secure coding standards
+
+---
+
+# 20. Future Security Enhancements
+
+Future capabilities:
+
+- Single Sign-On (SSO)
+- OAuth providers
+- Hardware security modules
+- Advanced threat detection
+- Compliance frameworks
+- Enterprise identity management
+
+---
+
+# 21. Related Documents
+
+- api-spec.md
+- database.md
+- provider-system.md
+- memory-system.md
+- knowledge-engine.md
+- tool-engine.md
+- sdk.md
+
+
+
+=========================================================
+FILE: .\docs\system-design\sdk.md
+=========================================================
+
+# SDK Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The SDK provides developer-friendly interfaces for applications communicating with Agentic AI OS.
+
+The SDK abstracts API communication details and provides consistent access to platform capabilities.
+
+Applications should be able to integrate AI capabilities without managing low-level API communication.
+
+---
+
+# 2. SDK Goals
+
+The SDK must provide:
+
+- Simple integration.
+- Type-safe interfaces.
+- Authentication handling.
+- Request management.
+- Streaming support.
+- Error handling.
+- Version compatibility.
+- Developer-friendly abstractions.
+
+---
+
+# 3. SDK Philosophy
+
+The SDK should make Agentic AI OS feel like a native capability inside applications.
+
+Developers should think:
+
+```
+Create Agent
+
+↓
+
+Run Workflow
+
+↓
+
+Retrieve Memory
+
+↓
+
+Search Knowledge
+```
+
+instead of:
+
+```
+Build HTTP request
+
+↓
+
+Attach headers
+
+↓
+
+Handle tokens
+
+↓
+
+Parse responses
+```
+
+---
+
+# 4. SDK Architecture
+
+```
+Application
+
+      |
+
+      ▼
+
+Agentic AI OS SDK
+
+      |
+
+      ▼
+
+API Client Layer
+
+      |
+
+      ▼
+
+Agentic AI OS API
+
+      |
+
+      ▼
+
+Platform Services
+```
+
+---
+
+# 5. Initial SDK Language
+
+Primary SDK:
+
+```
+Node.js / TypeScript
+```
+
+Reason:
+
+- Matches backend ecosystem.
+- Supports web applications.
+- Supports existing JavaScript applications.
+- Enables strong typing.
+
+---
+
+# 6. Future SDK Support
+
+Future SDKs may include:
+
+- Python
+- Go
+- Java
+- C#
+
+The SDK architecture should allow multiple language implementations.
+
+---
+
+# 7. SDK Modules
+
+The SDK is organized into capability modules.
+
+Example:
+
+```
+AgenticAIClient
+
+├── Chat
+
+├── Agents
+
+├── Workflows
+
+├── Memory
+
+├── Knowledge
+
+├── Tools
+
+└── Projects
+```
+
+---
+
+# 8. Client Initialization
+
+Example concept:
+
+```typescript
+const client = new AgenticAI({
+    apiKey: "key",
+    projectId: "project"
+});
+```
+
+The SDK manages:
+
+- Authentication.
+- Base URL configuration.
+- Request headers.
+- Connection handling.
+
+---
+
+# 9. Authentication Management
+
+The SDK supports:
+
+- API key authentication.
+- Token management.
+- Token refresh.
+- Secure credential handling.
+
+Applications should not manually manage authentication flows.
+
+---
+
+# 10. Chat Interface
+
+Example:
+
+```typescript
+client.chat.send({
+    message: "Explain this topic"
+});
+```
+
+The SDK handles:
+
+- Request formatting.
+- API communication.
+- Response parsing.
+
+---
+
+# 11. Agent Interface
+
+Example:
+
+```typescript
+client.agents.run({
+    agentId: "research-agent",
+    task: "Analyze document"
+});
+```
+
+The SDK provides access to agent execution.
+
+---
+
+# 12. Workflow Interface
+
+Example:
+
+```typescript
+client.workflows.execute({
+    workflowId: "research-workflow",
+    input: {}
+});
+```
+
+The SDK hides workflow execution complexity.
+
+---
+
+# 13. Memory Interface
+
+Example:
+
+```typescript
+client.memory.store({
+    content: "User preference"
+});
+```
+
+Supported operations:
+
+- Store memory.
+- Retrieve memory.
+- Search memory.
+- Delete memory.
+
+---
+
+# 14. Knowledge Interface
+
+Example:
+
+```typescript
+client.knowledge.search({
+    query: "company policy"
+});
+```
+
+Supported operations:
+
+- Upload knowledge.
+- Search knowledge.
+- Retrieve documents.
+
+---
+
+# 15. Streaming Support
+
+The SDK should support streaming responses.
+
+Examples:
+
+- Chat tokens.
+- Agent progress.
+- Workflow events.
+- Tool execution updates.
+
+Possible implementations:
+
+- Server Sent Events.
+- WebSockets.
+
+---
+
+# 16. Error Handling
+
+The SDK normalizes API errors.
+
+Example:
+
+```typescript
+try {
+
+}
+catch(error){
+
+}
+```
+
+Errors should include:
+
+- Error type.
+- Message.
+- Request ID.
+- Original cause.
+
+---
+
+# 17. Type Safety
+
+The TypeScript SDK should provide:
+
+- Request types.
+- Response types.
+- Configuration types.
+- Event types.
+
+Example:
+
+```typescript
+interface ChatResponse {
+    message: string;
+    metadata: object;
+}
+```
+
+---
+
+# 18. SDK Versioning
+
+SDK versions follow semantic versioning.
+
+Example:
+
+```
+1.0.0
+```
+
+Rules:
+
+Major:
+
+- Breaking changes.
+
+Minor:
+
+- New features.
+
+Patch:
+
+- Bug fixes.
+
+---
+
+# 19. SDK Testing
+
+The SDK requires:
+
+- Unit tests.
+- API integration tests.
+- Mock server testing.
+- Type validation.
+
+---
+
+# 20. SDK Documentation
+
+The SDK should provide:
+
+- Installation guide.
+- Authentication guide.
+- Examples.
+- API references.
+- Migration guides.
+
+---
+
+# 21. Security
+
+The SDK must:
+
+- Protect credentials.
+- Avoid logging secrets.
+- Validate configuration.
+- Support secure communication.
+
+---
+
+# 22. Future Enhancements
+
+Future SDK capabilities:
+
+- Offline support.
+- Automatic retries.
+- Background synchronization.
+- Local caching.
+- Event subscriptions.
+- AI workflow builders.
+
+---
+
+# 23. Related Documents
+
+- api-spec.md
+- provider-system.md
+- agent-framework.md
+- workflow-engine.md
+- security.md
+
+

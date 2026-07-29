@@ -1,0 +1,3728 @@
+﻿==================================================
+AGENTIC AI OS - PROJECT ARCHITECTURE CONTEXT
+==================================================
+
+SOURCE DOCUMENTS:
+
+ARCHITECTURE:
+- docs/architecture/00-vision.md
+- docs/architecture/01-system-overview.md
+- docs/architecture/02-high-level-architecture.md
+
+ARCHITECTURE DECISIONS:
+- docs/adr/ADR-001-modular-monolith.md
+- docs/adr/ADR-002-api-first.md
+- docs/adr/ADR-003-provider-abstraction.md
+- docs/adr/004-headless-core.md
+
+SYSTEM DESIGN:
+- docs/system-design/api-spec.md
+- docs/system-design/database.md
+- docs/system-design/security.md
+
+
+==================================================
+DOCUMENT CONTENT START
+==================================================
+
+
+# Agentic AI OS Vision
+
+**Version:** 1.0
+
+**Status:** Draft
+
+---
+
+# 1. Executive Summary
+
+Agentic AI OS is a modular, provider-agnostic artificial intelligence platform that serves as the intelligence layer between client applications and AI providers.
+
+Rather than embedding AI capabilities directly into individual applications, Agentic AI OS centralizes provider management, memory, workflows, tools, knowledge retrieval, and agent orchestration behind a unified API and SDK.
+
+This approach allows multiple applications to share a consistent intelligence platform while remaining independent of specific large language model (LLM) providers.
+
+---
+
+# 2. Problem Statement
+
+Modern applications commonly integrate directly with AI providers such as OpenAI, Gemini, or Claude. This creates several long-term challenges:
+
+- Tight coupling to provider-specific APIs
+- Duplicate AI logic across applications
+- Inconsistent prompt engineering
+- Fragmented memory implementations
+- Repeated workflow development
+- Difficult provider migration
+- Limited observability
+- Increased maintenance costs
+
+As organizations build additional AI-enabled applications, these problems compound and reduce development efficiency.
+
+---
+
+# 3. Solution Overview
+
+Agentic AI OS introduces an abstraction layer between client applications and AI providers.
+
+Applications interact exclusively with Agentic AI OS through stable APIs or SDKs.
+
+The platform is responsible for:
+
+- AI provider abstraction
+- Memory management
+- Knowledge retrieval
+- Prompt execution
+- Workflow orchestration
+- Tool execution
+- Agent collaboration
+- Monitoring
+- Configuration
+
+This architecture enables applications to evolve independently from AI providers while sharing common intelligence capabilities.
+
+---
+
+# 4. Vision
+
+To become a reusable, scalable, and extensible AI operating system that enables any application to securely integrate advanced artificial intelligence through a unified platform.
+
+---
+
+# 5. Mission
+
+Provide developers with a production-grade intelligence platform that:
+
+- abstracts AI providers
+- standardizes AI capabilities
+- manages memory consistently
+- orchestrates intelligent workflows
+- executes tools securely
+- exposes stable APIs and SDKs
+- evolves independently from client applications
+
+---
+
+# 6. Project Goals
+
+The primary goals of Agentic AI OS are:
+
+- Provider independence
+- Modular architecture
+- Reusable intelligence services
+- Long-term maintainability
+- High scalability
+- Strong observability
+- Enterprise-grade documentation
+- Secure integrations
+- Extensible plugin architecture
+
+---
+
+# 7. Non-Goals
+
+The initial releases will not include:
+
+- Training custom foundation models
+- Building proprietary LLMs
+- Public plugin marketplace
+- Billing platform
+- Distributed multi-region deployment
+- Mobile applications
+
+These capabilities may be introduced in future versions.
+
+---
+
+# 8. Target Users
+
+Primary users include:
+
+- Internal software products
+- Personal AI projects
+- Business applications
+- Automation systems
+- Developer tools
+
+Future users may include:
+
+- External developers
+- Organizations
+- Open-source contributors
+
+---
+
+# 9. Core Principles
+
+1. Architecture before implementation.
+2. Documentation before development.
+3. Modular by default.
+4. Provider agnostic.
+5. Interface-driven communication.
+6. Replaceable components.
+7. Single responsibility.
+8. Secure by design.
+9. Observable by default.
+10. Built for long-term evolution.
+
+---
+
+# 10. High-Level Platform Overview
+
+Applications communicate only with Agentic AI OS.
+
+Agentic AI OS manages providers, memory, workflows, tools, knowledge, prompts, and agents through a unified platform.
+
+AI providers remain implementation details hidden behind provider abstractions.
+
+---
+
+# 11. Platform Capabilities
+
+The platform is designed to support:
+
+- Chat
+- Memory
+- Knowledge retrieval
+- Agent collaboration
+- Workflow execution
+- Tool execution
+- Provider routing
+- File understanding
+- Vision
+- Image analysis
+- Audio processing
+- Prompt management
+- Analytics
+- SDKs
+- Administration
+
+---
+
+# 12. Quality Attributes
+
+The platform prioritizes:
+
+- Reliability
+- Scalability
+- Extensibility
+- Maintainability
+- Security
+- Performance
+- Testability
+- Provider independence
+- Clear documentation
+- Operational visibility
+
+---
+
+# 13. Long-Term Roadmap
+
+The platform will evolve incrementally through architecture, core infrastructure, provider abstraction, memory, tools, workflows, agents, dashboards, SDKs, and application integrations while maintaining backward compatibility whenever practical.
+
+---
+
+# 14. Success Criteria
+
+Agentic AI OS will be considered successful when it can:
+
+- Support multiple AI providers through a unified interface.
+- Serve multiple independent applications.
+- Execute reusable workflows.
+- Coordinate specialized agents.
+- Maintain multiple memory types.
+- Integrate new providers with minimal architectural change.
+- Scale without requiring fundamental redesign.
+# Agentic AI OS System Overview
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document provides a high-level overview of the Agentic AI OS platform.
+
+It describes the major architectural components, explains how they interact, and defines the responsibilities of each subsystem. This document serves as the bridge between the product vision and the detailed architecture documents.
+
+---
+
+# 2. System Overview
+
+Agentic AI OS is a modular intelligence platform that sits between client applications and artificial intelligence providers.
+
+Applications never communicate directly with AI providers. Instead, every request flows through Agentic AI OS, which is responsible for authentication, orchestration, memory management, workflow execution, tool execution, provider routing, and response generation.
+
+This architecture ensures consistency, maintainability, scalability, and provider independence across all client applications.
+
+---
+
+# 3. Platform Position
+
+```
+                    Client Applications
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                                                             â”‚
+â”‚  Home   Bakery   CRM   Story Studio   Future Applications   â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                            â”‚
+                            â”‚
+                            â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    Agentic AI OS Platform                   â”‚
+â”‚                                                             â”‚
+â”‚ Gateway                                                    â”‚
+â”‚ API Layer                                                  â”‚
+â”‚ Core Orchestrator                                          â”‚
+â”‚ Provider Engine                                            â”‚
+â”‚ Prompt Engine                                              â”‚
+â”‚ Memory Engine                                              â”‚
+â”‚ Knowledge Engine                                           â”‚
+â”‚ Tool Engine                                                â”‚
+â”‚ Workflow Engine                                            â”‚
+â”‚ Agent Framework                                            â”‚
+â”‚ Event Bus                                                  â”‚
+â”‚ Observability                                              â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                            â”‚
+                            â”‚
+                            â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    AI Provider Layer                        â”‚
+â”‚                                                             â”‚
+â”‚ OpenAI   Gemini   Claude   Ollama   OpenRouter   Future     â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+# 4. Design Philosophy
+
+The platform is designed around the following principles.
+
+- Separation of concerns
+- Interface-driven architecture
+- Provider independence
+- Modular development
+- Documentation-first engineering
+- Scalability by design
+- Replaceable components
+- Centralized intelligence
+- Stable public APIs
+
+Each subsystem has a clearly defined responsibility and communicates through well-defined interfaces.
+
+---
+
+# 5. Primary Responsibilities
+
+The platform is responsible for:
+
+- Receiving requests from applications
+- Authenticating and authorizing clients
+- Managing conversations
+- Maintaining memory
+- Retrieving knowledge
+- Planning workflows
+- Executing tools
+- Coordinating intelligent agents
+- Selecting AI providers
+- Managing prompts
+- Returning responses
+- Logging system activity
+
+---
+
+# 6. Core Architectural Components
+
+The platform consists of the following major subsystems.
+
+## Gateway
+
+Responsible for:
+
+- Authentication
+- Authorization
+- API versioning
+- Rate limiting
+- Request validation
+
+---
+
+## API Layer
+
+Responsible for:
+
+- REST APIs
+- Streaming APIs
+- SDK communication
+- Request serialization
+- Response formatting
+
+---
+
+## Core Orchestrator
+
+Responsible for:
+
+- Request coordination
+- Module orchestration
+- Execution sequencing
+- Error propagation
+- Response aggregation
+
+The Core Orchestrator is the central coordinator of the platform.
+
+No subsystem should directly coordinate other major subsystems unless explicitly designed to do so.
+
+---
+
+## Provider Engine
+
+Responsible for:
+
+- Provider abstraction
+- Provider selection
+- Failover
+- Retry policies
+- Response normalization
+
+---
+
+## Prompt Engine
+
+Responsible for:
+
+- Prompt templates
+- Prompt variables
+- Prompt versioning
+- Prompt optimization
+- Prompt composition
+
+---
+
+## Memory Engine
+
+Responsible for:
+
+- Conversation memory
+- Short-term memory
+- Long-term memory
+- Semantic memory
+- Project memory
+- Memory retrieval
+
+---
+
+## Knowledge Engine
+
+Responsible for:
+
+- Document indexing
+- Embedding generation
+- Vector search
+- Knowledge retrieval
+- Context generation
+
+---
+
+## Tool Engine
+
+Responsible for:
+
+- Tool registration
+- Tool execution
+- Permission enforcement
+- Result normalization
+
+---
+
+## Workflow Engine
+
+Responsible for:
+
+- Multi-step execution
+- Planning
+- Retry handling
+- Reflection
+- Checkpoints
+
+---
+
+## Agent Framework
+
+Responsible for:
+
+- Specialized AI agents
+- Agent lifecycle
+- Agent collaboration
+- Agent execution
+
+---
+
+## Event Bus
+
+Responsible for:
+
+- Internal events
+- Module communication
+- Event subscriptions
+- Asynchronous processing
+
+---
+
+## Observability
+
+Responsible for:
+
+- Logging
+- Metrics
+- Tracing
+- Audit logs
+- Monitoring
+
+---
+
+# 7. Infrastructure Layer
+
+The platform depends on several infrastructure services.
+
+- PostgreSQL
+- pgvector
+- Redis
+- BullMQ
+- Local storage
+- Object storage
+- Configuration management
+
+Infrastructure components provide shared services to the higher-level modules while remaining isolated from business logic.
+
+---
+
+# 8. Request Lifecycle
+
+A typical request follows this sequence.
+
+1. Client application sends a request.
+2. Gateway authenticates the request.
+3. API Layer validates the payload.
+4. Core Orchestrator receives the request.
+5. Memory is retrieved if required.
+6. Knowledge is retrieved if required.
+7. Workflow is planned if required.
+8. Tools are executed if required.
+9. Provider Engine selects an AI provider.
+10. Provider generates a response.
+11. Memory is updated.
+12. Logs and metrics are recorded.
+13. Response is returned to the client.
+
+---
+
+# 9. Architectural Characteristics
+
+The platform is designed to be:
+
+- Modular
+- Extensible
+- Provider-agnostic
+- Stateless where practical
+- Event-capable
+- API-first
+- Headless
+- Secure
+- Observable
+- Scalable
+
+---
+
+# 10. System Boundaries
+
+Agentic AI OS is responsible for intelligence orchestration.
+
+Client applications remain responsible for:
+
+- User interfaces
+- Business logic
+- Domain-specific workflows
+- User experience
+- Presentation
+
+AI providers remain responsible for:
+
+- Model inference
+- Token generation
+- Native capabilities
+
+The operating system coordinates these components but does not replace them.
+
+---
+
+# 11. Future Evolution
+
+The initial implementation will be deployed as a modular monolith.
+
+As system requirements evolve, major subsystems may be extracted into independent services without changing the public API or SDK.
+
+This migration path is an intentional architectural objective.
+
+---
+
+# 12. Related Documents
+
+- 00-vision.md
+- 02-high-level-architecture.md
+- provider-system.md
+- memory-system.md
+- workflow-engine.md
+- agent-framework.md
+- api-spec.md
+# Agentic AI OS High-Level Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document defines the official high-level architecture of Agentic AI OS.
+
+It establishes the architectural layers, dependency rules, communication patterns, module boundaries, and system-wide constraints that every implementation must follow.
+
+No component may violate the architectural rules defined in this document.
+
+---
+
+# 2. Architectural Style
+
+Agentic AI OS follows a layered modular architecture implemented initially as a Modular Monolith.
+
+The platform is designed so that every major subsystem can later be extracted into an independent service without requiring changes to the public API.
+
+The architecture combines principles from:
+
+- Layered Architecture
+- Clean Architecture
+- Hexagonal Architecture
+- Domain-Driven Design
+- Event-Driven Architecture
+
+---
+
+# 3. Primary Architectural Goals
+
+The architecture is designed to achieve the following goals:
+
+- Provider independence
+- Modularity
+- Maintainability
+- Testability
+- Scalability
+- Extensibility
+- High cohesion
+- Low coupling
+- Technology independence
+- Long-term evolution
+
+---
+
+# 4. Architectural Layers
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                  Client Applications                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Gateway & API Layer                                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Core Orchestrator                                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Core Platform Modules                                â”‚
+â”‚                                                      â”‚
+â”‚ Provider Engine                                      â”‚
+â”‚ Prompt Engine                                        â”‚
+â”‚ Memory Engine                                        â”‚
+â”‚ Knowledge Engine                                     â”‚
+â”‚ Workflow Engine                                      â”‚
+â”‚ Tool Engine                                          â”‚
+â”‚ Agent Framework                                      â”‚
+â”‚ Event Bus                                            â”‚
+â”‚ Observability                                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Infrastructure Layer                                 â”‚
+â”‚                                                      â”‚
+â”‚ PostgreSQL                                           â”‚
+â”‚ Redis                                                â”‚
+â”‚ BullMQ                                               â”‚
+â”‚ Local Storage                                        â”‚
+â”‚ Object Storage                                       â”‚
+â”‚ Configuration                                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ External Services                                    â”‚
+â”‚                                                      â”‚
+â”‚ OpenAI                                               â”‚
+â”‚ Gemini                                               â”‚
+â”‚ Claude                                               â”‚
+â”‚ Ollama                                               â”‚
+â”‚ OpenRouter                                           â”‚
+â”‚ Future Providers                                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+# 5. Layer Responsibilities
+
+## Client Layer
+
+Responsible for:
+
+- User interface
+- Business workflows
+- Domain-specific logic
+- Authentication requests
+- API consumption
+
+Client applications never communicate directly with AI providers.
+
+---
+
+## Gateway Layer
+
+Responsible for:
+
+- Authentication
+- Authorization
+- Rate limiting
+- API versioning
+- Request validation
+
+The Gateway is the only public entry point.
+
+---
+
+## Core Orchestrator
+
+Responsible for coordinating the complete execution of every request.
+
+Responsibilities include:
+
+- Request routing
+- Execution planning
+- Engine coordination
+- Failure handling
+- Response aggregation
+
+No engine should orchestrate other engines directly.
+
+---
+
+## Core Modules
+
+Each module owns one responsibility only.
+
+Modules communicate through interfaces rather than implementations.
+
+---
+
+## Infrastructure Layer
+
+Responsible for providing technical capabilities including:
+
+- Database
+- Cache
+- Queue
+- Storage
+- Configuration
+- Logging
+
+Infrastructure must never contain business logic.
+
+---
+
+## External Layer
+
+Represents systems outside Agentic AI OS.
+
+Examples:
+
+- AI Providers
+- Cloud Storage
+- Third-party APIs
+- External Tool Providers
+
+---
+
+# 6. Dependency Rules
+
+The following dependency rules are mandatory.
+
+Client
+
+â†“
+
+Gateway
+
+â†“
+
+Core Orchestrator
+
+â†“
+
+Platform Engines
+
+â†“
+
+Infrastructure
+
+â†“
+
+External Systems
+
+Dependencies may only move downward.
+
+Reverse dependencies are prohibited.
+
+---
+
+# 7. Module Isolation
+
+Every subsystem must be independently replaceable.
+
+For example:
+
+Provider Engine must be replaceable without changing Memory Engine.
+
+Memory Engine must be replaceable without changing Workflow Engine.
+
+Workflow Engine must not depend on Tool implementations.
+
+Agent Framework must not depend on provider-specific APIs.
+
+---
+
+# 8. Communication Rules
+
+Modules communicate using contracts.
+
+Allowed communication:
+
+Gateway
+
+â†“
+
+Core Orchestrator
+
+â†“
+
+Interfaces
+
+â†“
+
+Implementations
+
+Forbidden communication:
+
+Provider Engine
+
+â†“
+
+Memory Database
+
+â†“
+
+Workflow Engine
+
+â†“
+
+Prompt Engine
+
+Modules must never bypass architectural boundaries.
+
+---
+
+# 9. Interface-Based Design
+
+Every major module exposes an interface.
+
+Example:
+
+Provider Engine
+
+â†“
+
+Provider Interface
+
+â†“
+
+OpenAI Provider
+
+Gemini Provider
+
+Claude Provider
+
+Ollama Provider
+
+Applications interact only with interfaces.
+
+---
+
+# 10. Event-Driven Communication
+
+Certain operations should publish events.
+
+Examples include:
+
+- ConversationCreated
+- MemoryStored
+- WorkflowStarted
+- WorkflowCompleted
+- AgentFinished
+- ToolExecuted
+- ProviderFailed
+
+Events enable future scalability without increasing coupling.
+
+---
+
+# 11. Request Flow
+
+A typical request follows this sequence.
+
+Client
+
+â†“
+
+Gateway
+
+â†“
+
+API Layer
+
+â†“
+
+Core Orchestrator
+
+â†“
+
+Memory Retrieval
+
+â†“
+
+Knowledge Retrieval
+
+â†“
+
+Workflow Planning
+
+â†“
+
+Tool Execution
+
+â†“
+
+Provider Execution
+
+â†“
+
+Memory Update
+
+â†“
+
+Logging
+
+â†“
+
+Response
+
+---
+
+# 12. Architectural Constraints
+
+The following constraints apply throughout the platform.
+
+- No provider-specific code outside Provider Engine.
+- No database access from client applications.
+- No module may bypass the Core Orchestrator.
+- Business logic must remain outside infrastructure.
+- All communication must occur through interfaces.
+- Every public API must be versioned.
+- Every module must be independently testable.
+- Configuration must not be hardcoded.
+
+---
+
+# 13. Scalability Strategy
+
+Phase 1â€“6
+
+Modular Monolith
+
+â†“
+
+Phase 7+
+
+Service Extraction
+
+â†“
+
+Independent Scaling
+
+Potential future services include:
+
+- Memory Service
+- Workflow Service
+- Tool Service
+- Provider Service
+- Agent Service
+
+No API changes should be required during migration.
+
+---
+
+# 14. Error Handling Strategy
+
+Errors are classified into:
+
+- Validation Errors
+- Authentication Errors
+- Authorization Errors
+- Provider Errors
+- Tool Errors
+- Workflow Errors
+- Infrastructure Errors
+- Internal Errors
+
+Every error must follow a standardized response format.
+
+---
+
+# 15. Observability
+
+Every request should support:
+
+- Request ID
+- Correlation ID
+- Execution Timing
+- Structured Logging
+- Metrics
+- Distributed Tracing
+- Audit Logs
+
+Observability is considered a core architectural capability rather than an optional feature.
+
+---
+
+# 16. Security Boundaries
+
+Security applies at every architectural layer.
+
+Key principles include:
+
+- Least privilege
+- Secure defaults
+- Input validation
+- Secret isolation
+- Encrypted communication
+- Auditability
+
+Security concerns are documented in detail within the Security documentation.
+
+---
+
+# 17. Evolution Strategy
+
+The architecture is expected to evolve incrementally.
+
+Future additions should extend the platform through:
+
+- New Providers
+- New Agents
+- New Tools
+- New Memory Types
+- New Workflows
+- New SDKs
+
+Existing interfaces should remain stable whenever practical.
+
+---
+
+# 18. Related Documents
+
+- 00-vision.md
+- 01-system-overview.md
+- provider-system.md
+- memory-system.md
+- workflow-engine.md
+- tool-engine.md
+- agent-framework.md
+- api-spec.md
+- security.md
+# ADR-001: Modular Monolith Architecture
+
+**Status:** Accepted
+
+**Date:** 2026-07-27
+
+**Decision Owners:** Architecture Team
+
+---
+
+# 1. Context
+
+Agentic AI OS is designed as a reusable intelligence platform that will support multiple applications.
+
+The platform requires many independent capabilities:
+
+- Authentication
+- Provider management
+- Memory
+- Knowledge
+- Agents
+- Workflows
+- Tools
+- SDK
+- Analytics
+
+A key architectural decision is how these capabilities should be deployed and organized.
+
+Possible approaches include:
+
+1. Microservices architecture
+2. Modular monolith architecture
+3. Single application without module separation
+
+---
+
+# 2. Decision
+
+Agentic AI OS will begin as a **modular monolith**.
+
+The system will be implemented as a single deployable platform while maintaining strict internal module boundaries.
+
+Each capability will exist as an independent module with:
+
+- Clear responsibilities
+- Defined interfaces
+- Independent business logic
+- Controlled communication
+
+---
+
+# 3. Architecture Model
+
+```
+                 Agentic AI OS
+
+                      |
+
+              Modular Application
+
+                      |
+
+ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+ â”‚ Provider   â”‚ Memory     â”‚ Knowledge  â”‚
+
+ â”‚ Module     â”‚ Module     â”‚ Module     â”‚
+
+ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+
+ â”‚ Agents     â”‚ Workflow   â”‚ Tools      â”‚
+
+ â”‚ Module     â”‚ Module     â”‚ Module     â”‚
+
+ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+# 4. Alternatives Considered
+
+## Option 1: Microservices
+
+### Advantages
+
+- Independent deployment.
+- Independent scaling.
+- Strong service isolation.
+
+### Disadvantages
+
+- Higher infrastructure complexity.
+- More operational overhead.
+- Difficult local development.
+- Requires distributed communication.
+- Premature scaling.
+
+---
+
+## Option 2: Simple Monolith
+
+### Advantages
+
+- Easy development.
+- Simple deployment.
+
+### Disadvantages
+
+- Poor separation.
+- Difficult future extraction.
+- High coupling.
+- Weak module boundaries.
+
+---
+
+## Option 3: Modular Monolith
+
+### Advantages
+
+- Simple deployment.
+- Strong internal boundaries.
+- Easier development.
+- Future microservice migration possible.
+- Lower operational complexity.
+
+### Disadvantages
+
+- Requires discipline.
+- Modules share runtime initially.
+
+---
+
+# 5. Consequences
+
+## Positive Consequences
+
+The decision provides:
+
+- Faster development.
+- Easier debugging.
+- Lower infrastructure cost.
+- Clear architecture.
+- Future scalability path.
+
+---
+
+## Negative Consequences
+
+The system requires:
+
+- Strict module boundaries.
+- Careful dependency management.
+- Architectural discipline.
+
+---
+
+# 6. Module Communication Rules
+
+Modules should communicate through:
+
+- Interfaces
+- Service contracts
+- Events
+
+Modules should avoid:
+
+- Direct database access
+- Internal implementation dependencies
+- Circular dependencies
+
+---
+
+# 7. Future Migration Path
+
+If scaling requires independent services, modules can later become separate services.
+
+Example:
+
+Current:
+
+```
+Agentic AI OS
+
+ â”œâ”€â”€ Memory Module
+ â”œâ”€â”€ Tool Module
+ â””â”€â”€ Knowledge Module
+```
+
+Future:
+
+```
+Memory Service
+
+Tool Service
+
+Knowledge Service
+```
+
+The internal architecture should make this transition possible.
+
+---
+
+# 8. Implementation Impact
+
+The codebase should reflect module boundaries.
+
+Example:
+
+```
+src/
+
+modules/
+
+    providers/
+
+    memory/
+
+    knowledge/
+
+    agents/
+
+    workflows/
+
+    tools/
+```
+
+Each module owns:
+
+- Logic
+- Services
+- Interfaces
+- Tests
+
+---
+
+# 9. Final Decision
+
+Agentic AI OS will use a modular monolith architecture during initial development.
+
+The architecture prioritizes:
+
+- Maintainability
+- Clarity
+- Future scalability
+- Reduced complexity
+
+Microservices will only be introduced when actual scaling requirements justify the additional complexity.
+
+---
+
+# Related Documents
+
+- 02-high-level-architecture.md
+- database.md
+- api-spec.md
+- development-guidelines.md
+# ADR-002: API First Architecture
+
+**Status:** Accepted
+
+**Date:** 2026-07-27
+
+**Decision Owners:** Architecture Team
+
+---
+
+# 1. Context
+
+Agentic AI OS is designed to become an intelligence platform consumed by multiple applications.
+
+Potential clients include:
+
+- Home
+- Bakery
+- Sewa Bazaar
+- Story applications
+- Future external applications
+
+A key architectural decision is how applications should communicate with the platform.
+
+Possible approaches:
+
+1. Direct library integration
+2. Shared codebase integration
+3. API-first architecture
+
+---
+
+# 2. Decision
+
+Agentic AI OS will follow an **API-first architecture**.
+
+All client applications communicate with Agentic AI OS through stable APIs.
+
+Applications must not directly access:
+
+- AI providers
+- Internal services
+- Database layers
+- Agent implementations
+- Tool execution systems
+
+---
+
+# 3. Architecture Model
+
+```
+              Client Applications
+
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+        â”‚  Home    â”‚ Bakery   â”‚ Sewa     â”‚
+
+        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+                    |
+
+                    â–¼
+
+              Agentic AI OS API
+
+                    |
+
+                    â–¼
+
+          Internal Platform Modules
+
+                    |
+
+                    â–¼
+
+             AI Providers
+```
+
+---
+
+# 4. Alternatives Considered
+
+## Option 1: Direct Provider Integration
+
+Applications communicate directly with:
+
+- OpenAI
+- Gemini
+- Claude
+- Other providers
+
+### Advantages
+
+- Simple initial implementation.
+- No additional platform layer.
+
+### Disadvantages
+
+- Provider lock-in.
+- Duplicate logic.
+- Inconsistent AI behavior.
+- Difficult migration.
+- Security risks.
+
+Rejected.
+
+---
+
+## Option 2: Shared Internal Library
+
+Applications import Agentic AI OS code directly.
+
+### Advantages
+
+- Simple communication.
+- No network overhead.
+
+### Disadvantages
+
+- Tight coupling.
+- Difficult independent deployment.
+- Language limitations.
+- Poor external integration.
+
+Rejected.
+
+---
+
+## Option 3: API First
+
+Applications communicate through APIs.
+
+### Advantages
+
+- Clear boundary.
+- Provider independence.
+- Multiple language support.
+- SDK compatibility.
+- Easier scaling.
+- Better security.
+
+Selected.
+
+---
+
+# 5. API Responsibilities
+
+The API layer is responsible for:
+
+- Authentication
+- Authorization
+- Request validation
+- Rate limiting
+- Response formatting
+- Streaming
+- Error handling
+- Observability
+
+---
+
+# 6. Client Independence
+
+Applications should only understand:
+
+- API contracts
+- SDK interfaces
+- Authentication methods
+
+They should not know:
+
+- Which LLM provider is used.
+- How memory is stored.
+- How agents work internally.
+- How workflows execute.
+
+---
+
+# 7. SDK Relationship
+
+The SDK is built on top of the API.
+
+Architecture:
+
+```
+Application
+
+â†“
+
+Agentic AI OS SDK
+
+â†“
+
+Agentic AI OS API
+
+â†“
+
+Platform
+```
+
+The SDK improves developer experience but does not replace the API boundary.
+
+---
+
+# 8. Versioning Strategy
+
+The API must support evolution.
+
+Example:
+
+```
+/api/v1/
+
+/api/v2/
+```
+
+Breaking changes require a new version.
+
+Backward compatibility should be maintained whenever practical.
+
+---
+
+# 9. Consequences
+
+## Positive Consequences
+
+The architecture provides:
+
+- Application independence.
+- Provider flexibility.
+- Easier integrations.
+- Better security.
+- Future external access.
+
+---
+
+## Negative Consequences
+
+The system requires:
+
+- API maintenance.
+- Version management.
+- Network communication.
+- Additional authentication handling.
+
+---
+
+# 10. Implementation Impact
+
+The project should prioritize:
+
+- API contracts before implementation.
+- OpenAPI documentation.
+- Request and response schemas.
+- Stable interfaces.
+
+Internal implementation may evolve without affecting clients.
+
+---
+
+# 11. Final Decision
+
+Agentic AI OS will use an API-first architecture.
+
+The API is the primary communication boundary between applications and the intelligence platform.
+
+This ensures the platform remains reusable, scalable, and independent from individual products.
+
+---
+
+# Related Documents
+
+- api-spec.md
+- sdk.md
+- 02-high-level-architecture.md
+- ADR-001-modular-monolith.md
+# ADR-003: Provider Abstraction
+
+**Status:** Accepted
+
+**Date:** 2026-07-27
+
+**Decision Owners:** Architecture Team
+
+---
+
+# 1. Context
+
+Agentic AI OS depends on external AI providers to perform tasks such as:
+
+- Text generation
+- Embeddings
+- Vision processing
+- Audio understanding
+- Reasoning
+- Tool calling
+
+Available providers may include:
+
+- OpenAI
+- Gemini
+- Claude
+- Ollama
+- Local models
+- Future AI providers
+
+A critical architectural decision is whether applications and internal modules should directly depend on specific providers.
+
+---
+
+# 2. Decision
+
+Agentic AI OS will implement a provider abstraction layer.
+
+All AI providers must communicate through a unified internal interface.
+
+Applications and platform modules must never depend directly on provider-specific APIs.
+
+---
+
+# 3. Architecture Model
+
+```
+              Applications
+
+                    |
+
+                    â–¼
+
+             Agentic AI OS
+
+                    |
+
+                    â–¼
+
+           Provider Abstraction Layer
+
+                    |
+
+      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+      â–¼             â–¼             â–¼
+
+   OpenAI        Gemini        Claude
+
+      â–¼             â–¼             â–¼
+
+   Ollama     Local Models   Future Providers
+```
+
+---
+
+# 4. Problem Without Abstraction
+
+Direct provider integration creates:
+
+- Vendor lock-in.
+- Duplicate implementations.
+- Provider-specific logic everywhere.
+- Difficult migration.
+- Inconsistent behavior.
+- Security concerns.
+
+Example:
+
+```
+Application
+
+â†“
+
+OpenAI API
+
+```
+
+Changing providers would require modifying every application.
+
+---
+
+# 5. Alternatives Considered
+
+## Option 1: Direct Provider Integration
+
+Applications call providers directly.
+
+### Advantages
+
+- Simple initial setup.
+- Fast prototype development.
+
+### Disadvantages
+
+- Strong vendor dependency.
+- Difficult provider switching.
+- Repeated code.
+- Poor long-term architecture.
+
+Rejected.
+
+---
+
+## Option 2: Provider Logic Inside Agents
+
+Each agent manages its own provider.
+
+### Advantages
+
+- Flexible per agent.
+
+### Disadvantages
+
+- Provider logic duplicated.
+- Difficult maintenance.
+- Agents become coupled to vendors.
+
+Rejected.
+
+---
+
+## Option 3: Central Provider Abstraction
+
+All providers implement a common interface.
+
+### Advantages
+
+- Provider independence.
+- Easier testing.
+- Central configuration.
+- Unified monitoring.
+- Future model support.
+
+Selected.
+
+---
+
+# 6. Provider Interface Concept
+
+All providers should implement common capabilities.
+
+Example:
+
+```
+Provider Interface
+
+â”œâ”€â”€ generateText()
+
+â”œâ”€â”€ streamText()
+
+â”œâ”€â”€ createEmbedding()
+
+â”œâ”€â”€ analyzeImage()
+
+â”œâ”€â”€ processAudio()
+
+â””â”€â”€ healthCheck()
+```
+
+The exact interface will evolve during implementation.
+
+---
+
+# 7. Provider Responsibilities
+
+Each provider adapter is responsible for:
+
+- Authentication.
+- API communication.
+- Request formatting.
+- Response conversion.
+- Error handling.
+- Provider-specific features.
+
+---
+
+# 8. Platform Responsibilities
+
+The core platform manages:
+
+- Provider selection.
+- Routing.
+- Configuration.
+- Usage tracking.
+- Failover strategies.
+- Provider health.
+
+---
+
+# 9. Provider Selection
+
+Future provider selection may consider:
+
+- Task type.
+- Cost.
+- Speed.
+- Availability.
+- Quality.
+- User preference.
+
+Example:
+
+```
+Simple summary
+
+â†“
+
+Fast low-cost model
+
+
+Complex reasoning
+
+â†“
+
+Advanced reasoning model
+```
+
+---
+
+# 10. Model Independence
+
+Agents and workflows should request capabilities, not models.
+
+Incorrect:
+
+```
+Use GPT-5 for this task
+```
+
+Correct:
+
+```
+Use reasoning capability
+```
+
+The platform decides the appropriate provider.
+
+---
+
+# 11. Security Benefits
+
+Provider abstraction protects:
+
+- API credentials.
+- Internal configurations.
+- Provider usage data.
+
+Applications never receive provider keys.
+
+---
+
+# 12. Observability
+
+Provider usage should record:
+
+- Provider selected.
+- Model used.
+- Latency.
+- Token usage.
+- Errors.
+- Cost metrics.
+
+---
+
+# 13. Consequences
+
+## Positive Consequences
+
+Provides:
+
+- Provider freedom.
+- Easier experimentation.
+- Reduced vendor lock-in.
+- Centralized AI management.
+- Better operational control.
+
+---
+
+## Negative Consequences
+
+Requires:
+
+- Additional abstraction layer.
+- Interface maintenance.
+- Provider compatibility handling.
+
+---
+
+# 14. Future Enhancements
+
+Possible future capabilities:
+
+- Automatic provider routing.
+- Model benchmarking.
+- Cost optimization.
+- Local/private model support.
+- Multi-provider fallback.
+- Custom enterprise models.
+
+---
+
+# 15. Final Decision
+
+Agentic AI OS will use a provider abstraction architecture.
+
+AI providers are replaceable infrastructure components, not core dependencies.
+
+The intelligence platform must remain independent from any specific AI vendor.
+
+---
+
+# Related Documents
+
+- provider-system.md
+- api-spec.md
+- sdk.md
+- ADR-001-modular-monolith.md
+- ADR-002-api-first.md
+# ADR-004: Headless Core Architecture
+
+**Status:** Accepted
+
+**Date:** 2026-07-27
+
+**Decision Owners:** Architecture Team
+
+---
+
+# 1. Context
+
+Agentic AI OS is designed to serve multiple applications.
+
+Examples:
+
+- Home
+- Bakery
+- Sewa Bazaar
+- Story applications
+- Future external products
+
+Each application has different:
+
+- User interfaces
+- User experiences
+- Business logic
+- Workflows
+- Branding requirements
+
+A key architectural decision is whether Agentic AI OS should provide its own user interface or operate as a headless intelligence platform.
+
+---
+
+# 2. Decision
+
+Agentic AI OS will follow a **headless core architecture**.
+
+The platform will provide intelligence capabilities through APIs and SDKs while remaining independent from user interfaces.
+
+The platform does not own:
+
+- Web interfaces
+- Mobile applications
+- Product-specific UI
+- User experience design
+
+---
+
+# 3. Architecture Model
+
+```
+                 Client Applications
+
+
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+        â”‚  Home    â”‚ Bakery   â”‚ Sewa     â”‚
+
+        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+
+                    â”‚
+
+                    â–¼
+
+
+              Agentic AI OS
+
+
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+        â”‚ Intelligence Platform  â”‚
+
+        â”‚                        â”‚
+
+        â”‚ Agents                 â”‚
+
+        â”‚ Memory                 â”‚
+
+        â”‚ Knowledge              â”‚
+
+        â”‚ Workflows              â”‚
+
+        â”‚ Tools                  â”‚
+
+        â”‚ Providers              â”‚
+
+        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+---
+
+# 4. Problem Without Headless Architecture
+
+If Agentic AI OS owns the interface:
+
+- Applications become dependent on platform UI.
+- Different products cannot customize experiences.
+- Platform scope becomes unclear.
+- Business logic becomes mixed with presentation logic.
+
+The system would become an application instead of an operating system.
+
+---
+
+# 5. Alternatives Considered
+
+## Option 1: Full Application Platform
+
+Agentic AI OS provides:
+
+- Frontend
+- Backend
+- AI services
+
+### Advantages
+
+- Faster initial demonstration.
+- Single complete product.
+
+### Disadvantages
+
+- Limited flexibility.
+- Strong UI coupling.
+- Poor reuse across applications.
+
+Rejected.
+
+---
+
+## Option 2: Shared UI Framework
+
+Agentic AI OS provides reusable frontend components.
+
+### Advantages
+
+- Faster application development.
+- Consistent design.
+
+### Disadvantages
+
+- Creates frontend dependency.
+- Reduces application independence.
+
+Not selected as the core approach.
+
+---
+
+## Option 3: Headless Core
+
+Agentic AI OS provides only intelligence infrastructure.
+
+### Advantages
+
+- Maximum flexibility.
+- Multiple clients.
+- Clear responsibility boundaries.
+- Easier scaling.
+
+Selected.
+
+---
+
+# 6. Responsibility Separation
+
+## Agentic AI OS Responsibilities
+
+The platform owns:
+
+- AI execution.
+- Memory.
+- Knowledge.
+- Agents.
+- Workflows.
+- Tools.
+- Provider management.
+- Security.
+- Observability.
+
+---
+
+## Application Responsibilities
+
+Applications own:
+
+- User interface.
+- User experience.
+- Product logic.
+- Business rules.
+- User-specific interactions.
+
+---
+
+# 7. Example
+
+Home application:
+
+```
+User
+
+â†“
+
+Home Interface
+
+â†“
+
+Agentic AI OS SDK
+
+â†“
+
+Memory + Agents + Knowledge
+
+â†“
+
+AI Provider
+```
+
+The user never needs to know the underlying AI infrastructure.
+
+---
+
+# 8. Benefits
+
+## Application Freedom
+
+Each application can create a unique experience.
+
+Example:
+
+Home:
+
+```
+Emotional personal assistant
+```
+
+Bakery:
+
+```
+Business automation assistant
+```
+
+Sewa Bazaar:
+
+```
+Marketplace intelligence
+```
+
+All can use the same intelligence layer.
+
+---
+
+## Faster Evolution
+
+The AI platform can improve independently.
+
+New capabilities become available to all clients.
+
+Example:
+
+Adding:
+
+- Better memory
+- New providers
+- New agents
+
+benefits every connected application.
+
+---
+
+# 9. Consequences
+
+## Positive Consequences
+
+Provides:
+
+- Clear boundaries.
+- Reusable platform.
+- Multiple application support.
+- Independent development.
+- Long-term flexibility.
+
+---
+
+## Negative Consequences
+
+Requires:
+
+- Strong API design.
+- More responsibility for client applications.
+- Additional integration work.
+
+---
+
+# 10. Implementation Impact
+
+The repository should avoid:
+
+- Frontend application code inside core.
+- Product-specific UI logic.
+- Application-specific business rules.
+
+The core should expose capabilities, not experiences.
+
+---
+
+# 11. Future Extensions
+
+Possible future additions:
+
+- Admin dashboard.
+- Developer portal.
+- Monitoring interface.
+
+These are platform management tools, not application interfaces.
+
+---
+
+# 12. Final Decision
+
+Agentic AI OS will use a headless core architecture.
+
+The platform provides intelligence infrastructure while client applications remain responsible for their own user experiences.
+
+This keeps Agentic AI OS reusable across many products and prevents application-specific coupling.
+
+---
+
+# Related Documents
+
+- ADR-001-modular-monolith.md
+- ADR-002-api-first.md
+- ADR-003-provider-abstraction.md
+- api-spec.md
+- sdk.md
+- 02-high-level-architecture.md
+# API Specification
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The API Specification defines how external applications communicate with Agentic AI OS.
+
+The API provides a stable interface between client applications and the intelligence platform.
+
+Applications must interact only through Agentic AI OS APIs and must never communicate directly with AI providers.
+
+---
+
+# 2. API Goals
+
+The API must provide:
+
+- Stable communication contracts.
+- Provider-independent AI access.
+- Secure authentication.
+- Request validation.
+- Streaming support.
+- Error consistency.
+- Observability.
+- Backward compatibility.
+
+---
+
+# 3. API Architecture
+
+```
+Application
+
+      |
+
+      â–¼
+
+API Gateway
+
+      |
+
+      â–¼
+
+Agentic AI OS Services
+
+      |
+
+      â”œâ”€â”€ Provider Engine
+
+      â”œâ”€â”€ Memory Engine
+
+      â”œâ”€â”€ Knowledge Engine
+
+      â”œâ”€â”€ Workflow Engine
+
+      â”œâ”€â”€ Tool Engine
+
+      â””â”€â”€ Agent Framework
+```
+
+---
+
+# 4. API Style
+
+Initial API style:
+
+```
+REST API
+```
+
+Technology:
+
+```
+Fastify
+```
+
+Future support:
+
+- GraphQL
+- WebSocket streaming
+- SDK abstraction
+- Event-based APIs
+
+---
+
+# 5. API Versioning
+
+All APIs must be versioned.
+
+Example:
+
+```
+/api/v1/
+```
+
+Future versions:
+
+```
+/api/v2/
+```
+
+Breaking changes require a new API version.
+
+---
+
+# 6. Authentication
+
+The API uses:
+
+- JWT access tokens
+- Refresh tokens
+- API keys for applications
+
+Authentication flow:
+
+```
+Client
+
+â†“
+
+Authenticate
+
+â†“
+
+Receive Token
+
+â†“
+
+API Requests
+
+â†“
+
+Token Validation
+```
+
+---
+
+# 7. Authorization
+
+Authorization is based on:
+
+- User identity
+- Application identity
+- Project ownership
+- Permissions
+- Resource access
+
+Every request must be evaluated before execution.
+
+---
+
+# 8. Core API Domains
+
+The API is divided into domains.
+
+---
+
+# Authentication API
+
+Responsible for:
+
+- Login
+- Token generation
+- Token refresh
+- Logout
+
+Example:
+
+```
+POST /api/v1/auth/login
+
+POST /api/v1/auth/refresh
+```
+
+---
+
+# Application API
+
+Used by client applications.
+
+Responsibilities:
+
+- Register applications.
+- Manage application configuration.
+- Manage API credentials.
+
+Example:
+
+```
+POST /api/v1/applications
+
+GET /api/v1/applications/:id
+```
+
+---
+
+# Chat API
+
+Provides general AI interaction.
+
+Example:
+
+```
+POST /api/v1/chat
+```
+
+Request:
+
+```json
+{
+  "message": "Explain this document",
+  "projectId": "project-id"
+}
+```
+
+Response:
+
+```json
+{
+  "response": "Generated answer",
+  "metadata": {}
+}
+```
+
+---
+
+# Agent API
+
+Provides access to agent execution.
+
+Example:
+
+```
+POST /api/v1/agents/:id/run
+```
+
+Request:
+
+```json
+{
+  "task": "Research topic",
+  "context": {}
+}
+```
+
+---
+
+# Workflow API
+
+Provides workflow execution.
+
+Example:
+
+```
+POST /api/v1/workflows/:id/run
+```
+
+Request:
+
+```json
+{
+  "input": {}
+}
+```
+
+---
+
+# Memory API
+
+Provides memory operations.
+
+Examples:
+
+```
+GET /api/v1/memory
+
+POST /api/v1/memory
+
+DELETE /api/v1/memory/:id
+```
+
+---
+
+# Knowledge API
+
+Provides knowledge operations.
+
+Examples:
+
+```
+POST /api/v1/knowledge/upload
+
+GET /api/v1/knowledge/search
+```
+
+---
+
+# Tool API
+
+Provides controlled tool execution.
+
+Example:
+
+```
+POST /api/v1/tools/:id/execute
+```
+
+Tools must never bypass permission checks.
+
+---
+
+# Provider API
+
+Internal management API.
+
+Responsibilities:
+
+- Provider configuration.
+- Provider health.
+- Provider availability.
+
+External applications should not directly access providers.
+
+---
+
+# 9. Request Structure
+
+Standard request metadata:
+
+```json
+{
+  "requestId": "unique-id",
+  "applicationId": "app-id",
+  "projectId": "project-id",
+  "timestamp": "date"
+}
+```
+
+---
+
+# 10. Response Structure
+
+All APIs return a consistent format.
+
+Success:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "metadata": {}
+}
+```
+
+Failure:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Description"
+  }
+}
+```
+
+---
+
+# 11. Streaming Support
+
+AI responses may require streaming.
+
+Supported methods:
+
+- Server Sent Events (SSE)
+- WebSocket
+
+Streaming use cases:
+
+- Chat responses.
+- Long workflows.
+- Agent progress.
+- Tool execution updates.
+
+---
+
+# 12. Error Handling
+
+Standard error categories:
+
+```
+AUTH_ERROR
+
+VALIDATION_ERROR
+
+PERMISSION_ERROR
+
+NOT_FOUND
+
+PROVIDER_ERROR
+
+TOOL_ERROR
+
+WORKFLOW_ERROR
+
+INTERNAL_ERROR
+```
+
+Errors must include:
+
+- Error code.
+- Message.
+- Request ID.
+- Timestamp.
+
+---
+
+# 13. Rate Limiting
+
+API protection includes:
+
+- Request limits.
+- Token limits.
+- Application quotas.
+- Abuse prevention.
+
+Limits should be configurable.
+
+---
+
+# 14. Observability
+
+Every request should generate:
+
+- Request ID.
+- Execution trace.
+- Latency metrics.
+- Provider usage.
+- Error information.
+
+Logs must allow debugging across the complete execution chain.
+
+---
+
+# 15. OpenAPI Documentation
+
+The API must maintain an OpenAPI specification.
+
+Benefits:
+
+- Automatic documentation.
+- SDK generation.
+- API testing.
+- Client integration.
+
+---
+
+# 16. Backward Compatibility
+
+API evolution follows:
+
+- Additive changes preferred.
+- Deprecated features maintained temporarily.
+- Breaking changes require version upgrades.
+
+---
+
+# 17. Security Requirements
+
+The API must enforce:
+
+- Authentication.
+- Authorization.
+- Input validation.
+- Rate limiting.
+- Secure headers.
+- Audit logging.
+
+---
+
+# 18. Future Enhancements
+
+Future API capabilities:
+
+- GraphQL gateway.
+- Event streaming.
+- Webhook support.
+- External developer portal.
+- API marketplace.
+- Real-time collaboration.
+
+---
+
+# 19. Related Documents
+
+- sdk.md
+- security.md
+- provider-system.md
+- workflow-engine.md
+- agent-framework.md
+- database.md
+# Database Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Database Architecture defines how Agentic AI OS stores, organizes, and manages persistent information.
+
+The database layer provides reliable storage for platform entities while maintaining separation between modules.
+
+The architecture must support future expansion without requiring fundamental redesign.
+
+---
+
+# 2. Database Goals
+
+The database system must provide:
+
+- Reliable persistence.
+- Modular data ownership.
+- Efficient querying.
+- Semantic search support.
+- Transaction consistency.
+- Scalability.
+- Migration support.
+- Strong security boundaries.
+
+---
+
+# 3. Database Technology
+
+Initial database stack:
+
+Primary Database:
+
+```
+PostgreSQL
+```
+
+Extensions:
+
+```
+pgvector
+```
+
+Purpose:
+
+- Relational data storage.
+- Structured queries.
+- Vector similarity search.
+- Transaction management.
+
+---
+
+# 4. Database Principles
+
+The database follows these principles:
+
+- Modules own their data.
+- Data access occurs through services.
+- Direct cross-module database access should be avoided.
+- Schema changes require migrations.
+- Sensitive data requires protection.
+- Database design follows domain boundaries.
+
+---
+
+# 5. High-Level Database Architecture
+
+```
+                    Agentic AI OS
+
+                         â”‚
+
+                    Database Layer
+
+                         â”‚
+
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+    â–¼            â–¼            â–¼            â–¼
+
+ Identity     Agents      Memory      Knowledge
+
+
+    â–¼            â–¼            â–¼            â–¼
+
+
+ Projects    Workflows   Executions   Analytics
+
+```
+
+---
+
+# 6. Core Database Domains
+
+The database is divided conceptually into domains.
+
+---
+
+# Identity Domain
+
+Responsible for:
+
+- Users
+- Authentication
+- Roles
+- Permissions
+- API credentials
+
+Example entities:
+
+```
+users
+
+roles
+
+permissions
+
+api_keys
+```
+
+---
+
+# Application Domain
+
+Responsible for registered client applications.
+
+Examples:
+
+- Home
+- Bakery
+- Sewa Bazaar
+- External applications
+
+Example entities:
+
+```
+applications
+
+projects
+
+application_settings
+```
+
+---
+
+# Agent Domain
+
+Stores agent definitions.
+
+Example entities:
+
+```
+agents
+
+agent_versions
+
+agent_capabilities
+```
+
+---
+
+# Memory Domain
+
+Stores persistent memory information.
+
+Example entities:
+
+```
+memories
+
+memory_entries
+
+memory_embeddings
+```
+
+Detailed design is defined in:
+
+```
+memory-system.md
+```
+
+---
+
+# Knowledge Domain
+
+Stores knowledge metadata and retrieval information.
+
+Example entities:
+
+```
+documents
+
+document_chunks
+
+embeddings
+
+knowledge_sources
+```
+
+Detailed design is defined in:
+
+```
+knowledge-engine.md
+```
+
+---
+
+# Workflow Domain
+
+Stores workflow definitions and executions.
+
+Example entities:
+
+```
+workflows
+
+workflow_steps
+
+workflow_runs
+
+workflow_events
+```
+
+---
+
+# Execution Domain
+
+Tracks AI operations.
+
+Example entities:
+
+```
+requests
+
+executions
+
+execution_logs
+
+usage_metrics
+```
+
+---
+
+# 7. Schema Organization
+
+The database should logically separate domains.
+
+Possible structure:
+
+```
+public
+
+auth
+
+agents
+
+memory
+
+knowledge
+
+workflows
+
+analytics
+```
+
+The exact implementation may evolve after Phase 1 evaluation.
+
+---
+
+# 8. Migration Strategy
+
+All schema changes must use migrations.
+
+Requirements:
+
+- Version controlled migrations.
+- Repeatable deployment.
+- Rollback capability.
+- Environment consistency.
+
+Migration tools may include:
+
+- Prisma Migrate
+- Drizzle migrations
+- Knex migrations
+- Custom migration system
+
+Final selection will happen during implementation.
+
+---
+
+# 9. Vector Storage
+
+The platform uses pgvector for:
+
+- Memory embeddings.
+- Knowledge embeddings.
+- Semantic search.
+
+Vector data should remain associated with:
+
+- Original source.
+- Namespace.
+- Permissions.
+- Metadata.
+
+Vectors must never exist without traceable source information.
+
+---
+
+# 10. Multi-Tenant Considerations
+
+Although initial deployment may support personal projects, architecture should support multiple applications.
+
+Isolation strategies:
+
+- Application ID separation.
+- Project namespaces.
+- Permission filtering.
+- Database-level policies.
+
+---
+
+# 11. Database Access Layer
+
+Applications and modules should not directly access database tables.
+
+Preferred flow:
+
+```
+Module
+
+â†“
+
+Service Layer
+
+â†“
+
+Repository Layer
+
+â†“
+
+Database
+```
+
+Benefits:
+
+- Easier testing.
+- Replaceable database logic.
+- Cleaner boundaries.
+
+---
+
+# 12. Data Validation
+
+Database protection exists at multiple levels:
+
+Application Layer:
+
+- Zod validation.
+- Business rules.
+
+Database Layer:
+
+- Constraints.
+- Foreign keys.
+- Indexes.
+- Unique rules.
+
+Both layers are required.
+
+---
+
+# 13. Indexing Strategy
+
+Indexes should support:
+
+- Frequent queries.
+- Search operations.
+- Foreign keys.
+- Time-based filtering.
+
+Examples:
+
+```
+created_at
+
+user_id
+
+application_id
+
+project_id
+
+namespace_id
+```
+
+Indexing decisions should be based on actual usage patterns.
+
+---
+
+# 14. Backup Strategy
+
+Production environments require:
+
+- Automated backups.
+- Recovery procedures.
+- Backup testing.
+
+Development environments may use:
+
+- Local database dumps.
+- Managed database snapshots.
+
+---
+
+# 15. Security
+
+Database security includes:
+
+- Encrypted connections.
+- Credential protection.
+- Least privilege access.
+- Sensitive field protection.
+- Audit logging.
+
+Database credentials must never be stored in source control.
+
+---
+
+# 16. Performance Considerations
+
+Future optimization areas:
+
+- Connection pooling.
+- Query optimization.
+- Read replicas.
+- Caching.
+- Partitioning.
+
+Performance improvements should be introduced only when required.
+
+---
+
+# 17. Future Enhancements
+
+Possible future capabilities:
+
+- Distributed database architecture.
+- Dedicated vector database.
+- Data warehouse.
+- Event sourcing.
+- Real-time analytics storage.
+
+---
+
+# 18. Related Documents
+
+- memory-system.md
+- knowledge-engine.md
+- api-spec.md
+- security.md
+- workflow-engine.md
+- agent-framework.md
+# Security Architecture
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+The Security Architecture defines how Agentic AI OS protects users, applications, data, agents, tools, and platform resources.
+
+Security is a foundational capability of the platform and must be considered in every architectural decision.
+
+Agentic AI OS must provide secure AI capabilities without compromising modularity or extensibility.
+
+---
+
+# 2. Security Goals
+
+The security system must provide:
+
+- Authentication
+- Authorization
+- Data protection
+- Access control
+- Secure communication
+- Auditability
+- Secret management
+- Threat prevention
+
+---
+
+# 3. Security Principles
+
+Agentic AI OS follows these principles:
+
+## Least Privilege
+
+Every user, application, agent, and tool receives only the permissions required for its task.
+
+---
+
+## Defense in Depth
+
+Security controls exist at multiple layers:
+
+- API layer
+- Service layer
+- Database layer
+- Tool layer
+- Infrastructure layer
+
+---
+
+## Secure by Default
+
+New components should begin with restricted permissions.
+
+Access should be explicitly granted.
+
+---
+
+## Zero Trust
+
+Every request must be verified.
+
+No component should automatically trust another component.
+
+---
+
+## Separation of Responsibilities
+
+Security logic should remain independent from business logic.
+
+---
+
+# 4. Security Architecture
+
+```
+                 Client Application
+
+                         â”‚
+
+                         â–¼
+
+                  API Gateway
+
+                         â”‚
+
+              Authentication Layer
+
+                         â”‚
+
+              Authorization Layer
+
+                         â”‚
+
+              Platform Services
+
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+
+        â–¼            â–¼            â–¼
+
+    Agents       Tools       Data
+
+```
+
+---
+
+# 5. Authentication System
+
+Authentication verifies identity.
+
+Supported methods:
+
+- JWT authentication
+- Refresh tokens
+- API keys
+- Service credentials
+
+---
+
+## JWT Authentication
+
+Used for:
+
+- User sessions
+- Dashboard access
+- API requests
+
+JWT tokens contain:
+
+- User identity
+- Permissions
+- Expiration information
+
+---
+
+## API Keys
+
+Used for:
+
+- External applications
+- SDK authentication
+- Service-to-service communication
+
+Examples:
+
+```
+Home Application
+
+Bakery Application
+
+External Developer Application
+```
+
+---
+
+# 6. Authorization System
+
+Authorization determines what an authenticated entity can access.
+
+The system evaluates:
+
+- User identity
+- Application identity
+- Project ownership
+- Resource permissions
+- Tool permissions
+
+---
+
+# 7. Permission Model
+
+Permissions should be granular.
+
+Examples:
+
+```
+memory.read
+
+memory.write
+
+knowledge.search
+
+knowledge.upload
+
+tool.execute
+
+workflow.run
+
+agent.execute
+```
+
+---
+
+# 8. Application Isolation
+
+Each connected application must have isolated resources.
+
+Example:
+
+```
+Home Application
+
+    |
+
+    Memory Namespace A
+
+
+Bakery Application
+
+    |
+
+    Memory Namespace B
+```
+
+Applications must never access each other's data without explicit permission.
+
+---
+
+# 9. Data Security
+
+Sensitive data includes:
+
+- User information
+- Conversations
+- Memories
+- Knowledge documents
+- API credentials
+- Provider keys
+
+Protection methods:
+
+- Encryption in transit
+- Encryption at rest
+- Access control
+- Data isolation
+- Audit logging
+
+---
+
+# 10. Secret Management
+
+Secrets include:
+
+- API keys
+- Database credentials
+- Provider credentials
+- Encryption keys
+
+Rules:
+
+- Never store secrets in source code.
+- Never expose secrets through logs.
+- Use environment variables during development.
+- Use secret managers in production.
+
+---
+
+# 11. Provider Security
+
+AI provider credentials must remain inside Agentic AI OS.
+
+Applications must never contain:
+
+```
+OpenAI API Key
+
+Gemini API Key
+
+Claude API Key
+```
+
+The correct architecture:
+
+```
+Application
+
+â†“
+
+Agentic AI OS
+
+â†“
+
+Provider Credentials
+
+â†“
+
+AI Provider
+```
+
+---
+
+# 12. Tool Security
+
+Tools represent the highest-risk execution area.
+
+Tool security includes:
+
+- Permission checks
+- Input validation
+- Output filtering
+- Execution limits
+- Audit logs
+
+Examples:
+
+A file tool should not automatically have:
+
+```
+delete_all_files
+```
+
+permission.
+
+---
+
+# 13. Prompt Security
+
+The platform must protect against:
+
+- Prompt injection
+- Instruction manipulation
+- Data leakage
+- Unsafe prompt modification
+
+Controls include:
+
+- Input filtering
+- Context separation
+- Permission-aware retrieval
+- Prompt version control
+
+---
+
+# 14. Memory Security
+
+Memory must support:
+
+- User isolation
+- Application isolation
+- Namespace separation
+- Permission checks
+
+Agents must only retrieve memories they are authorized to access.
+
+---
+
+# 15. Knowledge Security
+
+Knowledge access requires:
+
+- Source permissions
+- Namespace validation
+- Retrieval filtering
+
+Example:
+
+Private company documents must not appear in public application searches.
+
+---
+
+# 16. Audit Logging
+
+Security-sensitive actions must be logged.
+
+Examples:
+
+- Login attempts
+- Permission changes
+- Tool execution
+- Data access
+- Provider usage
+- Configuration changes
+
+Logs should include:
+
+- Actor
+- Action
+- Resource
+- Timestamp
+- Result
+
+---
+
+# 17. API Security
+
+API protection includes:
+
+- Authentication
+- Authorization
+- Rate limiting
+- Request validation
+- Secure headers
+- CORS policies
+
+---
+
+# 18. Infrastructure Security
+
+Deployment security includes:
+
+- Container isolation
+- Environment separation
+- Secure networking
+- Dependency updates
+- Vulnerability monitoring
+
+---
+
+# 19. Development Security
+
+Development practices:
+
+- Code review
+- Dependency scanning
+- Secret scanning
+- Security testing
+- Secure coding standards
+
+---
+
+# 20. Future Security Enhancements
+
+Future capabilities:
+
+- Single Sign-On (SSO)
+- OAuth providers
+- Hardware security modules
+- Advanced threat detection
+- Compliance frameworks
+- Enterprise identity management
+
+---
+
+# 21. Related Documents
+
+- api-spec.md
+- database.md
+- provider-system.md
+- memory-system.md
+- knowledge-engine.md
+- tool-engine.md
+- sdk.md

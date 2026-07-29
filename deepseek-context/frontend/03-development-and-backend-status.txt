@@ -1,0 +1,2502 @@
+
+=========================================================
+FILE: .\docs\development\coding-standards.md
+=========================================================
+
+# Coding Standards
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document defines coding standards and engineering conventions for Agentic AI OS.
+
+The purpose is to maintain:
+
+- Consistent code quality.
+- Long-term maintainability.
+- Clear architecture boundaries.
+- Easier collaboration.
+- Reliable system evolution.
+
+All contributors and AI coding assistants must follow these standards.
+
+---
+
+# 2. General Principles
+
+Development must follow these principles:
+
+## Simplicity Over Cleverness
+
+Code should be easy to understand.
+
+Avoid:
+
+- unnecessary abstractions
+- complex solutions
+- premature optimization
+
+Prefer:
+
+- clear logic
+- readable structure
+- maintainable design
+
+---
+
+## Single Responsibility
+
+Each module, class, and function should have one clear responsibility.
+
+Avoid:
+
+```
+UserService
+
+- Authentication
+- Email sending
+- Database migration
+- File processing
+```
+
+Prefer:
+
+```
+AuthenticationService
+
+EmailService
+
+FileService
+```
+
+---
+
+## Explicit Over Implicit
+
+Code behavior should be obvious.
+
+Avoid hidden side effects.
+
+Prefer:
+
+- clear parameters
+- clear return values
+- documented behavior
+
+---
+
+# 3. Language Standards
+
+Primary backend language:
+
+```
+TypeScript
+```
+
+Requirements:
+
+- Strict TypeScript mode enabled.
+- Avoid unnecessary `any`.
+- Use interfaces for contracts.
+- Use types for data structures.
+
+---
+
+# 4. Naming Conventions
+
+## Files
+
+Use:
+
+```
+kebab-case
+```
+
+Examples:
+
+```
+provider-service.ts
+
+memory-controller.ts
+
+workflow-engine.ts
+```
+
+---
+
+## Variables and Functions
+
+Use:
+
+```
+camelCase
+```
+
+Examples:
+
+```typescript
+const userId;
+
+function createMemory();
+```
+
+---
+
+## Classes and Interfaces
+
+Use:
+
+```
+PascalCase
+```
+
+Examples:
+
+```typescript
+class MemoryService
+
+interface ProviderAdapter
+```
+
+---
+
+## Constants
+
+Use:
+
+```
+UPPER_SNAKE_CASE
+```
+
+Example:
+
+```typescript
+MAX_RETRY_COUNT
+```
+
+---
+
+# 5. Module Structure
+
+Each module should follow consistent organization.
+
+Example:
+
+```
+modules/
+
+memory/
+
+├── controllers/
+
+├── services/
+
+├── repositories/
+
+├── interfaces/
+
+├── schemas/
+
+├── tests/
+
+└── index.ts
+```
+
+---
+
+# 6. Dependency Rules
+
+Modules must communicate through defined interfaces.
+
+Avoid:
+
+```
+Memory Module
+
+↓
+
+Direct Database Access
+
+↓
+
+Knowledge Tables
+```
+
+Prefer:
+
+```
+Memory Module
+
+↓
+
+Knowledge Interface
+
+↓
+
+Knowledge Service
+```
+
+---
+
+# 7. Error Handling
+
+Errors must be:
+
+- predictable
+- typed
+- documented
+
+Avoid:
+
+```typescript
+throw new Error("Something failed");
+```
+
+Prefer:
+
+```typescript
+throw new ProviderError(
+    "Provider unavailable"
+);
+```
+
+---
+
+# 8. Validation
+
+All external input must be validated.
+
+Sources include:
+
+- API requests
+- User input
+- Tool input
+- Configuration values
+
+Preferred validation:
+
+```
+Zod
+```
+
+---
+
+# 9. Configuration Management
+
+Configuration must:
+
+- come from environment variables
+- be validated
+- have defaults where appropriate
+
+Never:
+
+- hardcode secrets
+- hardcode provider keys
+- store environment-specific values in code
+
+---
+
+# 10. Database Standards
+
+Database access must use:
+
+```
+Controller
+
+↓
+
+Service
+
+↓
+
+Repository
+
+↓
+
+Database
+```
+
+Avoid:
+
+- database queries inside controllers
+- direct database access from agents
+- duplicated queries
+
+---
+
+# 11. API Standards
+
+All APIs must have:
+
+- validation schemas
+- documented responses
+- consistent errors
+- authentication rules
+
+API contracts must be documented before implementation.
+
+---
+
+# 12. Logging Standards
+
+Logs should provide useful operational information.
+
+Include:
+
+- request ID
+- operation name
+- execution status
+- errors
+- timing information
+
+Never log:
+
+- passwords
+- API keys
+- sensitive user information
+
+---
+
+# 13. Comments and Documentation
+
+Comments should explain:
+
+- why something exists
+- architectural decisions
+- complex reasoning
+
+Avoid comments that only repeat code.
+
+Bad:
+
+```typescript
+// Create user
+createUser();
+```
+
+Good:
+
+```typescript
+// User creation happens here because identity ownership
+// must be established before resource allocation.
+```
+
+---
+
+# 14. Testing Standards
+
+Production code should include tests.
+
+Required:
+
+- Unit tests for business logic.
+- Integration tests for APIs.
+- Module tests for critical systems.
+
+---
+
+# 15. AI Generated Code Rules
+
+AI assistants may generate code, but generated code must:
+
+- follow architecture.
+- pass review.
+- include tests.
+- avoid unnecessary dependencies.
+- match existing patterns.
+
+AI-generated code is not automatically approved.
+
+---
+
+# 16. Security Standards
+
+Code must:
+
+- validate inputs.
+- protect secrets.
+- enforce permissions.
+- avoid unsafe execution.
+
+Security decisions must follow:
+
+```
+security.md
+```
+
+---
+
+# 17. Git Standards
+
+Commits should be:
+
+- small
+- focused
+- descriptive
+
+Example:
+
+Good:
+
+```
+Add provider abstraction interface
+```
+
+Bad:
+
+```
+update stuff
+```
+
+---
+
+# 18. Code Review Requirements
+
+Before merging:
+
+Review:
+
+- Architecture compliance.
+- Security impact.
+- Test coverage.
+- Performance impact.
+- Documentation updates.
+
+---
+
+# 19. Final Rule
+
+The goal is not the smallest amount of code.
+
+The goal is a system that can evolve for years without becoming unmaintainable.
+
+Agentic AI OS prioritizes:
+
+- clarity
+- reliability
+- modularity
+- long-term sustainability
+
+---
+
+# Related Documents
+
+- development-guidelines.md
+- testing-strategy.md
+- security.md
+- architecture documents
+- ADR documents
+
+
+
+=========================================================
+FILE: .\docs\development\development-guidelines.md
+=========================================================
+
+# Development Guidelines
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document defines the development process and engineering workflow for Agentic AI OS.
+
+The purpose is to ensure the platform is built systematically with:
+
+- Architectural discipline.
+- Clear ownership.
+- Controlled changes.
+- Strong documentation.
+- Long-term maintainability.
+
+---
+
+# 2. Development Philosophy
+
+Agentic AI OS follows:
+
+```
+Architecture
+
+↓
+
+Documentation
+
+↓
+
+Planning
+
+↓
+
+Implementation
+
+↓
+
+Testing
+
+↓
+
+Review
+
+↓
+
+Release
+```
+
+Implementation should never begin before the required architecture and documentation are understood.
+
+---
+
+# 3. Architecture First Approach
+
+Before implementing any major feature:
+
+Required steps:
+
+1. Understand the requirement.
+2. Review existing architecture.
+3. Define responsibilities.
+4. Update documentation.
+5. Create implementation plan.
+6. Implement.
+7. Review results.
+
+---
+
+# 4. Feature Development Process
+
+Every feature follows this lifecycle:
+
+```
+Requirement
+
+↓
+
+Architecture Discussion
+
+↓
+
+Design Document
+
+↓
+
+Implementation Plan
+
+↓
+
+Development
+
+↓
+
+Testing
+
+↓
+
+Code Review
+
+↓
+
+Documentation Update
+
+↓
+
+Release
+```
+
+---
+
+# 5. Module Development Rules
+
+Each module must have:
+
+- Clear responsibility.
+- Defined interfaces.
+- Independent tests.
+- Documentation.
+- Controlled dependencies.
+
+A module should answer:
+
+"What problem does this module own?"
+
+---
+
+# 6. Dependency Management
+
+Dependencies should be added carefully.
+
+Before adding a dependency evaluate:
+
+- Is it necessary?
+- Is the project maintained?
+- Does it introduce security risk?
+- Can existing tools solve the problem?
+
+Avoid unnecessary packages.
+
+---
+
+# 7. Documentation Requirements
+
+Documentation must be updated when:
+
+- Architecture changes.
+- APIs change.
+- Database structure changes.
+- New modules are introduced.
+- Important decisions are made.
+
+Code without documentation is incomplete.
+
+---
+
+# 8. AI Assisted Development Rules
+
+AI coding assistants may help with:
+
+- Implementation.
+- Refactoring.
+- Testing.
+- Documentation.
+
+However:
+
+AI-generated code must be reviewed.
+
+Required checks:
+
+- Architecture compliance.
+- Security impact.
+- Code quality.
+- Test coverage.
+- Dependency impact.
+
+---
+
+# 9. Implementation Planning
+
+Before coding, define:
+
+- Objective.
+- Scope.
+- Files affected.
+- Dependencies.
+- Testing strategy.
+- Rollback approach.
+
+Avoid large uncontrolled changes.
+
+---
+
+# 10. Branching Strategy
+
+Recommended Git workflow:
+
+```
+main
+
+↓
+
+feature branches
+
+↓
+
+review
+
+↓
+
+merge
+```
+
+Example:
+
+```
+feature/provider-adapter
+feature/memory-storage
+feature/workflow-engine
+```
+
+---
+
+# 11. Commit Guidelines
+
+Commits should:
+
+- Represent one logical change.
+- Have clear messages.
+- Avoid unrelated modifications.
+
+Example:
+
+Good:
+
+```
+Implement provider interface contract
+```
+
+Bad:
+
+```
+changes
+```
+
+---
+
+# 12. Review Process
+
+Every significant change should review:
+
+## Architecture
+
+Does it follow the design?
+
+---
+
+## Security
+
+Does it introduce risks?
+
+---
+
+## Maintainability
+
+Can future developers understand it?
+
+---
+
+## Testing
+
+Is behavior verified?
+
+---
+
+## Documentation
+
+Are changes recorded?
+
+---
+
+# 13. Testing Before Completion
+
+A feature is not complete until:
+
+- Tests pass.
+- Documentation is updated.
+- Review is completed.
+
+---
+
+# 14. Database Change Process
+
+Database changes require:
+
+1. Schema update.
+2. Migration creation.
+3. Migration testing.
+4. Documentation update.
+
+Direct production database changes should be avoided.
+
+---
+
+# 15. API Change Process
+
+API changes require:
+
+- Updated specification.
+- Compatibility review.
+- Version consideration.
+- Documentation update.
+
+Breaking changes require additional approval.
+
+---
+
+# 16. Security Review
+
+Security review is required for:
+
+- Authentication changes.
+- Permission changes.
+- Tool execution changes.
+- Data access changes.
+- External integrations.
+
+---
+
+# 17. Performance Considerations
+
+Performance should be considered when introducing:
+
+- Database queries.
+- Background jobs.
+- AI provider calls.
+- File processing.
+- Large data operations.
+
+Optimization should be based on evidence.
+
+---
+
+# 18. Production Readiness Checklist
+
+Before production release:
+
+Required:
+
+- Documentation complete.
+- Tests passing.
+- Security reviewed.
+- Monitoring available.
+- Error handling verified.
+- Deployment process tested.
+
+---
+
+# 19. Long-Term Maintenance
+
+The system should continuously improve through:
+
+- Refactoring.
+- Dependency updates.
+- Documentation updates.
+- Architecture reviews.
+- Technical debt management.
+
+---
+
+# 20. Final Principle
+
+Agentic AI OS is designed as a long-term platform.
+
+Development decisions should optimize for:
+
+- Stability over speed.
+- Quality over shortcuts.
+- Architecture over temporary solutions.
+
+Every implementation should strengthen the foundation for future capabilities.
+
+---
+
+# Related Documents
+
+- coding-standards.md
+- testing-strategy.md
+- implementation-roadmap.md
+- security.md
+- ADR documents
+
+
+
+=========================================================
+FILE: .\docs\development\testing-strategy.md
+=========================================================
+
+# Testing Strategy
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document defines the testing strategy for Agentic AI OS.
+
+The purpose is to ensure:
+
+- Reliability.
+- Maintainability.
+- Security.
+- Predictable behavior.
+- Safe platform evolution.
+
+Testing is a required part of development, not an optional final step.
+
+---
+
+# 2. Testing Principles
+
+Agentic AI OS follows these principles:
+
+## Test Behavior, Not Implementation
+
+Tests should verify what a module does, not how it internally works.
+
+---
+
+## Test Boundaries
+
+Each module should be tested through its public interfaces.
+
+Internal implementation details should not create unnecessary test dependencies.
+
+---
+
+## Automate Repeated Verification
+
+Important checks should run automatically through:
+
+- Continuous integration.
+- Automated test suites.
+- Deployment pipelines.
+
+---
+
+## Quality Over Coverage Numbers
+
+High coverage does not guarantee quality.
+
+Important logic requires meaningful tests.
+
+---
+
+# 3. Testing Pyramid
+
+The platform follows a layered testing approach.
+
+```
+              End-to-End Tests
+
+                    ▲
+
+             Integration Tests
+
+                    ▲
+
+               Unit Tests
+
+                    ▲
+```
+
+---
+
+# 4. Unit Testing
+
+Unit tests verify individual components.
+
+Examples:
+
+- Services.
+- Utility functions.
+- Validation logic.
+- Business rules.
+- Data transformations.
+
+Tools:
+
+```
+Vitest
+```
+
+---
+
+## Unit Test Requirements
+
+Important modules should include:
+
+- Normal behavior tests.
+- Error handling tests.
+- Edge case tests.
+
+Example:
+
+Memory service:
+
+```
+Should store memory
+
+Should retrieve memory
+
+Should reject unauthorized access
+```
+
+---
+
+# 5. Integration Testing
+
+Integration tests verify communication between components.
+
+Examples:
+
+- API + Service.
+- Service + Database.
+- Workflow + Agents.
+- Agent + Tools.
+
+Tools:
+
+```
+Vitest
+
+Supertest
+```
+
+---
+
+# 6. API Testing
+
+All APIs should verify:
+
+- Authentication.
+- Authorization.
+- Validation.
+- Response format.
+- Error handling.
+
+Example:
+
+```
+POST /memory
+
+Valid request
+    →
+Success response
+
+Invalid request
+    →
+Validation error
+
+Unauthorized request
+    →
+Access denied
+```
+
+---
+
+# 7. Database Testing
+
+Database testing should verify:
+
+- Schema correctness.
+- Migrations.
+- Queries.
+- Relationships.
+- Constraints.
+
+Requirements:
+
+- Test migrations before deployment.
+- Avoid destructive testing on production databases.
+
+---
+
+# 8. Provider Testing
+
+AI providers require special testing.
+
+The system should test:
+
+- Provider interface compatibility.
+- Request formatting.
+- Error handling.
+- Fallback behavior.
+
+Provider tests should not depend only on live AI APIs.
+
+Use:
+
+- Mock providers.
+- Test environments.
+- Controlled responses.
+
+---
+
+# 9. Agent Testing
+
+Agents require evaluation beyond normal unit tests.
+
+Testing areas:
+
+## Reasoning Behavior
+
+Verify:
+
+- Correct task interpretation.
+- Appropriate decisions.
+- Proper tool usage.
+
+---
+
+## Boundary Testing
+
+Verify agents:
+
+- Do not exceed permissions.
+- Do not access unauthorized data.
+- Follow workflow rules.
+
+---
+
+## Output Testing
+
+Verify:
+
+- Expected structure.
+- Required information.
+- Safety constraints.
+
+---
+
+# 10. Workflow Testing
+
+Workflow testing verifies:
+
+- Execution order.
+- State transitions.
+- Error recovery.
+- Retry behavior.
+- Checkpoints.
+
+Example:
+
+```
+Workflow Start
+
+↓
+
+Planning Step
+
+↓
+
+Research Agent
+
+↓
+
+Review Agent
+
+↓
+
+Completion
+```
+
+Each transition should be testable.
+
+---
+
+# 11. Tool Testing
+
+Tools are security-sensitive components.
+
+Testing must verify:
+
+- Input validation.
+- Permission checks.
+- Execution limits.
+- Failure handling.
+
+Example:
+
+File Tool:
+
+Allowed:
+
+```
+Read approved directory
+```
+
+Rejected:
+
+```
+Access restricted files
+```
+
+---
+
+# 12. Memory Testing
+
+Memory tests should verify:
+
+- Storage.
+- Retrieval.
+- Ranking.
+- Namespace isolation.
+- Permission enforcement.
+
+Example:
+
+```
+User A memory
+
+cannot be retrieved
+
+by User B
+```
+
+---
+
+# 13. Knowledge Testing
+
+Knowledge system tests should verify:
+
+- Document ingestion.
+- Search accuracy.
+- Permission filtering.
+- Metadata handling.
+
+---
+
+# 14. Security Testing
+
+Security testing includes:
+
+- Authentication tests.
+- Authorization tests.
+- Input validation tests.
+- Secret exposure checks.
+- Dependency scanning.
+
+---
+
+# 15. Performance Testing
+
+Performance testing should evaluate:
+
+- API response times.
+- Database queries.
+- AI provider latency.
+- Workflow execution time.
+
+Optimization should happen based on measured bottlenecks.
+
+---
+
+# 16. End-to-End Testing
+
+End-to-end tests verify complete user scenarios.
+
+Example:
+
+```
+Application
+
+↓
+
+Agentic AI OS API
+
+↓
+
+Workflow
+
+↓
+
+Agent
+
+↓
+
+Memory
+
+↓
+
+Provider
+
+↓
+
+Response
+```
+
+---
+
+# 17. Regression Testing
+
+Every major change should verify existing functionality remains stable.
+
+Important areas:
+
+- API compatibility.
+- Memory behavior.
+- Provider integrations.
+- Workflow execution.
+
+---
+
+# 18. AI Evaluation
+
+Traditional tests are insufficient for AI systems.
+
+Future evaluation should include:
+
+- Response quality checks.
+- Prompt evaluation.
+- Agent performance benchmarks.
+- Human review workflows.
+
+---
+
+# 19. Continuous Integration
+
+CI pipeline should include:
+
+- Install dependencies.
+- Type checking.
+- Unit tests.
+- Integration tests.
+- Security checks.
+- Build verification.
+
+---
+
+# 20. Test Completion Criteria
+
+A feature is complete when:
+
+- Tests are written.
+- Tests pass.
+- Documentation is updated.
+- Architecture review is complete.
+
+---
+
+# 21. Final Principle
+
+Testing exists to protect the future of Agentic AI OS.
+
+A platform designed for many applications must prioritize:
+
+- Stability.
+- Predictability.
+- Security.
+- Confidence in change.
+
+---
+
+# Related Documents
+
+- coding-standards.md
+- development-guidelines.md
+- security.md
+- workflow-engine.md
+- agent-framework.md
+
+
+
+=========================================================
+FILE: .\docs\development\project-glossary.md
+=========================================================
+
+# Project Glossary
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This glossary defines important terms used throughout Agentic AI OS documentation and development.
+
+The goal is to maintain consistent terminology across:
+
+- Architecture documents.
+- Source code.
+- API specifications.
+- Development discussions.
+- Implementation prompts.
+
+---
+
+# 2. Platform Terms
+
+## Agentic AI OS
+
+A reusable intelligence platform that provides AI capabilities to applications through APIs and SDKs.
+
+It acts as an abstraction layer between applications and AI providers.
+
+---
+
+## Client Application
+
+A software application that consumes Agentic AI OS capabilities.
+
+Examples:
+
+- Home
+- Bakery
+- Sewa Bazaar
+- Future applications
+
+Client applications do not directly communicate with AI providers.
+
+---
+
+## Intelligence Layer
+
+The collection of AI capabilities provided by Agentic AI OS.
+
+Includes:
+
+- Agents
+- Memory
+- Knowledge
+- Workflows
+- Tools
+- Providers
+
+---
+
+# 3. AI Provider Terms
+
+## AI Provider
+
+An external system that provides artificial intelligence models.
+
+Examples:
+
+- OpenAI
+- Gemini
+- Claude
+- Ollama
+
+Providers are replaceable components.
+
+---
+
+## Provider Adapter
+
+A module that translates Agentic AI OS requests into provider-specific API calls.
+
+Example:
+
+```
+Provider Interface
+
+↓
+
+OpenAI Adapter
+
+↓
+
+OpenAI API
+```
+
+---
+
+## Model
+
+A specific AI model provided by an AI provider.
+
+Examples:
+
+- Language models.
+- Vision models.
+- Embedding models.
+
+Agentic AI OS should request capabilities rather than depend on specific models.
+
+---
+
+# 4. Agent Terms
+
+## Agent
+
+An intelligent component responsible for reasoning and completing specialized tasks.
+
+Examples:
+
+- Research Agent.
+- Writing Agent.
+- Planning Agent.
+
+Agents operate inside workflow boundaries.
+
+---
+
+## BaseAgent
+
+The common interface that all agents inherit from.
+
+It defines standard agent behavior.
+
+---
+
+## Multi-Agent System
+
+A system where multiple specialized agents collaborate to complete complex tasks.
+
+---
+
+# 5. Workflow Terms
+
+## Workflow
+
+A controlled sequence of actions performed to complete a task.
+
+A workflow defines:
+
+- Steps.
+- Order.
+- Conditions.
+- State.
+- Recovery behavior.
+
+---
+
+## Workflow Engine
+
+The system responsible for executing and managing workflows.
+
+Responsibilities:
+
+- Execution.
+- Checkpoints.
+- Retries.
+- State management.
+
+---
+
+## Step
+
+A single action inside a workflow.
+
+A step may execute:
+
+- An agent.
+- A tool.
+- A service.
+- A validation process.
+
+---
+
+# 6. Memory Terms
+
+## Memory
+
+Information created through interaction and experience.
+
+Examples:
+
+- User preferences.
+- Previous conversations.
+- Personal context.
+
+---
+
+## Short-Term Memory
+
+Temporary context used during active interactions.
+
+Example:
+
+Current conversation history.
+
+---
+
+## Long-Term Memory
+
+Persistent information retained over time.
+
+Example:
+
+User preferences.
+
+---
+
+## Semantic Memory
+
+Meaning-based stored information retrieved through similarity.
+
+Usually implemented with vector search.
+
+---
+
+## Memory Namespace
+
+A logical isolation boundary for memory data.
+
+Example:
+
+```
+Home Application
+
+↓
+
+Home User Namespace
+```
+
+---
+
+# 7. Knowledge Terms
+
+## Knowledge
+
+Information intentionally provided to the system.
+
+Examples:
+
+- Documents.
+- Manuals.
+- Research files.
+- Business information.
+
+---
+
+## Knowledge Engine
+
+The system responsible for storing, indexing, and retrieving knowledge.
+
+---
+
+## Retrieval
+
+The process of finding relevant information from stored knowledge or memory.
+
+---
+
+## Embedding
+
+A numerical representation of information used for similarity search.
+
+---
+
+# 8. Tool Terms
+
+## Tool
+
+A capability that allows agents or workflows to perform actions.
+
+Examples:
+
+- Search.
+- File access.
+- Database queries.
+- External APIs.
+
+---
+
+## Tool Engine
+
+The system responsible for registering, managing, and executing tools.
+
+---
+
+## Tool Registry
+
+A collection of available tools and their metadata.
+
+---
+
+## Tool Permission
+
+Rules defining who or what can execute a tool.
+
+---
+
+# 9. API Terms
+
+## API Gateway
+
+The entry point where applications communicate with Agentic AI OS.
+
+Responsibilities:
+
+- Authentication.
+- Validation.
+- Routing.
+- Security.
+
+---
+
+## API Contract
+
+A documented agreement defining:
+
+- Requests.
+- Responses.
+- Errors.
+- Authentication requirements.
+
+---
+
+## SDK
+
+A software development kit that simplifies communication with Agentic AI OS.
+
+The SDK uses the API internally.
+
+---
+
+# 10. Architecture Terms
+
+## Module
+
+A self-contained system component with:
+
+- Clear responsibility.
+- Defined interfaces.
+- Controlled dependencies.
+
+---
+
+## Modular Monolith
+
+An architecture where multiple independent modules exist inside one deployable system.
+
+---
+
+## Headless Architecture
+
+A system without a built-in user interface.
+
+Agentic AI OS provides intelligence services while applications create their own experiences.
+
+---
+
+## Interface
+
+A defined communication contract between components.
+
+Interfaces allow implementations to be replaced.
+
+---
+
+## Abstraction Layer
+
+A layer that hides implementation details behind a stable interface.
+
+Example:
+
+Provider abstraction hides OpenAI, Gemini, and Claude differences.
+
+---
+
+# 11. Data Terms
+
+## Namespace
+
+A logical boundary used for separating data ownership and access.
+
+Examples:
+
+- User namespace.
+- Application namespace.
+- Project namespace.
+
+---
+
+## Context
+
+Information provided to an AI system to help complete a task.
+
+Context may include:
+
+- User request.
+- Memory.
+- Knowledge.
+- Workflow state.
+
+---
+
+## Context Assembly
+
+The process of collecting and preparing relevant information before agent execution.
+
+---
+
+# 12. Execution Terms
+
+## Execution State
+
+The current condition of a running workflow or task.
+
+Examples:
+
+- Started.
+- Running.
+- Waiting.
+- Completed.
+- Failed.
+
+---
+
+## Checkpoint
+
+A saved execution state that allows recovery or continuation.
+
+---
+
+## Retry
+
+Repeating a failed operation according to defined rules.
+
+---
+
+# 13. Security Terms
+
+## Authentication
+
+Verifying who is making a request.
+
+---
+
+## Authorization
+
+Determining what an authenticated entity is allowed to do.
+
+---
+
+## Least Privilege
+
+Providing only the minimum required permissions.
+
+---
+
+## Audit Log
+
+A record of important system actions.
+
+---
+
+# 14. Development Terms
+
+## ADR
+
+Architecture Decision Record.
+
+A document explaining important architectural decisions and their reasoning.
+
+---
+
+## Technical Debt
+
+Future maintenance cost created by shortcuts or poor design decisions.
+
+---
+
+## Refactoring
+
+Improving internal code structure without changing external behavior.
+
+---
+
+# 15. Final Principle
+
+A shared vocabulary creates a shared understanding.
+
+Consistent terminology helps humans and AI assistants collaborate effectively while maintaining architectural clarity.
+
+---
+
+# Related Documents
+
+- architecture documents
+- ADR documents
+- coding-standards.md
+- development-guidelines.md
+
+
+
+=========================================================
+FILE: .\docs\development\implementation-roadmap.md
+=========================================================
+
+# Implementation Roadmap
+
+**Version:** 1.0
+
+**Status:** Draft
+
+**Last Updated:** 2026-07-27
+
+**Owner:** Architecture Team
+
+---
+
+# 1. Purpose
+
+This document defines the technical implementation sequence for Agentic AI OS.
+
+The roadmap ensures the platform is built incrementally while preserving architectural integrity.
+
+Development must follow dependency order.
+
+Higher-level capabilities should only be implemented after required foundations exist.
+
+---
+
+# 2. Implementation Philosophy
+
+Agentic AI OS follows:
+
+```
+Architecture
+
+↓
+
+Foundation
+
+↓
+
+Infrastructure
+
+↓
+
+Core Capabilities
+
+↓
+
+Intelligence Layer
+
+↓
+
+Applications
+```
+
+The system should become more capable without requiring architectural redesign.
+
+---
+
+# 3. Phase Overview
+
+Implementation will follow these phases:
+
+```
+Phase 0
+Architecture
+
+↓
+
+Phase 1
+Core Skeleton
+
+↓
+
+Phase 2
+Gateway
+
+↓
+
+Phase 3
+Provider Layer
+
+↓
+
+Phase 4
+Memory System
+
+↓
+
+Phase 5
+Tool Engine
+
+↓
+
+Phase 6
+Workflow Engine
+
+↓
+
+Phase 7
+Agent Framework
+
+↓
+
+Phase 8
+Dashboard
+
+↓
+
+Phase 9
+SDK
+
+↓
+
+Phase 10
+Application Integration
+```
+
+---
+
+# 4. Phase 0 — Architecture
+
+## Objective
+
+Finalize system design before production implementation.
+
+## Deliverables
+
+- Vision documentation
+- Architecture documentation
+- ADR decisions
+- Database design
+- API design
+- Memory design
+- Agent design
+- Workflow design
+- Security model
+- Development standards
+
+## Completion Criteria
+
+Phase 0 is complete when:
+
+- Architecture is approved.
+- Documentation exists.
+- Implementation direction is clear.
+
+---
+
+# 5. Phase 1 — Core Skeleton
+
+## Objective
+
+Create the foundational project structure.
+
+## Scope
+
+Implement:
+
+- Repository structure.
+- TypeScript configuration.
+- Module architecture.
+- Environment configuration.
+- Basic tooling.
+
+No intelligence features.
+
+## Deliverables
+
+- Working project structure.
+- Build system.
+- Testing setup.
+- Development environment.
+
+---
+
+# 6. Phase 2 — Gateway
+
+## Objective
+
+Create the entry point between applications and Agentic AI OS.
+
+## Scope
+
+Implement:
+
+- API server.
+- Authentication.
+- Authorization.
+- Configuration management.
+- Health checks.
+- Application registration.
+
+## Deliverables
+
+Applications can securely communicate with the platform.
+
+---
+
+# 7. Phase 3 — Provider Layer
+
+## Objective
+
+Create AI provider independence.
+
+## Scope
+
+Implement:
+
+- Provider interface.
+- Provider adapters.
+- Configuration system.
+- Provider health checks.
+
+Initial providers:
+
+- OpenAI
+- Gemini
+- Ollama
+
+Future providers should be addable without architecture changes.
+
+---
+
+# 8. Phase 4 — Memory System
+
+## Objective
+
+Create persistent intelligence context.
+
+## Scope
+
+Implement:
+
+- Short-term memory.
+- Long-term memory.
+- Semantic memory.
+- Namespaces.
+- Vector storage.
+- Retrieval.
+
+Requirements:
+
+- User isolation.
+- Application isolation.
+- Permission control.
+
+---
+
+# 9. Phase 5 — Tool Engine
+
+## Objective
+
+Create secure capability execution.
+
+## Scope
+
+Implement:
+
+- Tool interface.
+- Tool registry.
+- Permission checks.
+- Execution tracking.
+
+Initial tools:
+
+- File access.
+- Search.
+- Database access.
+
+Future:
+
+- MCP tools.
+- External services.
+
+---
+
+# 10. Phase 6 — Workflow Engine
+
+## Objective
+
+Create controlled multi-step execution.
+
+## Scope
+
+Implement:
+
+- Workflow definitions.
+- Execution engine.
+- State management.
+- Retry handling.
+- Checkpoints.
+
+Workflows become the foundation for reliable automation.
+
+---
+
+# 11. Phase 7 — Agent Framework
+
+## Objective
+
+Create reusable intelligent agents.
+
+## Scope
+
+Implement:
+
+- BaseAgent interface.
+- Agent lifecycle.
+- Agent configuration.
+- Agent communication.
+
+Initial agents:
+
+- Research Agent.
+- Writing Agent.
+- Planning Agent.
+- Review Agent.
+
+---
+
+# 12. Phase 8 — Dashboard
+
+## Objective
+
+Create platform management capabilities.
+
+## Scope
+
+Implement:
+
+- Administration.
+- Projects.
+- Providers.
+- Agents.
+- Memory management.
+- Logs.
+- Analytics.
+
+---
+
+# 13. Phase 9 — SDK
+
+## Objective
+
+Simplify application integration.
+
+## Scope
+
+Implement:
+
+- Node SDK.
+- Authentication handling.
+- API wrappers.
+- Streaming support.
+
+Future:
+
+- Python SDK.
+- Additional languages.
+
+---
+
+# 14. Phase 10 — Application Integration
+
+## Objective
+
+Connect real applications to Agentic AI OS.
+
+Initial clients:
+
+- Home.
+- Bakery.
+- Sewa Bazaar.
+
+Integration goals:
+
+- Replace direct AI integrations.
+- Use shared intelligence services.
+- Validate platform architecture.
+
+---
+
+# 15. Dependency Rules
+
+The following order must be respected:
+
+```
+Gateway
+requires
+Core Skeleton
+
+
+Provider Layer
+requires
+Gateway
+
+
+Memory
+requires
+Database + Provider Layer
+
+
+Agents
+require
+Memory + Tools + Workflows
+```
+
+Avoid implementing dependent features early.
+
+---
+
+# 16. Review Gates
+
+Each phase requires review before moving forward.
+
+Review questions:
+
+- Does implementation follow architecture?
+- Are responsibilities clear?
+- Is documentation updated?
+- Are tests included?
+- Are future phases protected?
+
+---
+
+# 17. Change Management
+
+If implementation reveals architectural issues:
+
+1. Stop implementation.
+2. Review architecture.
+3. Update documentation.
+4. Record decision through ADR if required.
+5. Continue development.
+
+---
+
+# 18. Final Principle
+
+The goal is not the fastest first version.
+
+The goal is a foundation that can support years of evolution.
+
+Every phase should increase capability while preserving:
+
+- Modularity.
+- Security.
+- Replaceability.
+- Maintainability.
+
+---
+
+# Related Documents
+
+- development-guidelines.md
+- roadmap.md
+- milestones.md
+- ADR documents
+- architecture documents
+
+
+=========================================================
+BACKEND IMPLEMENTATION STATUS
+=========================================================
+## Completion Report: Agentic AI OS Backend – Phases 1–7
+
+**To:** Project Supervisor  
+**From:** Backend Implementation Engineer  
+**Date:** July 28, 2026  
+**Subject:** Completion of Backend Implementation (Core Skeleton through Agent Framework)
+
+---
+
+### Executive Summary
+
+All seven planned backend phases of the Agentic AI OS platform have been implemented, tested, and verified. The system now provides a **headless, provider‑agnostic intelligence platform** with authentication, memory, tools, workflows, and autonomous agents, all accessible via a versioned REST API. The platform is built as a **modular monolith** using TypeScript, Fastify, PostgreSQL (Neon), and Drizzle ORM, with **59 passing unit/integration tests** and full OpenAPI documentation.
+
+No AI provider calls are hard‑coded; the abstraction layer supports OpenAI, Gemini, DeepSeek, and a Noop mock. All modules are independent and replaceable, strictly following the approved architecture.
+
+---
+
+### 1. Architecture Summary
+
+- **Style:** Layered modular monolith (ADR‑001)  
+- **API‑First:** All client communication via versioned REST endpoints (ADR‑002)  
+- **Provider Abstraction:** AI providers hidden behind a unified interface (ADR‑003)  
+- **Headless Core:** No UI; applications own the user experience (ADR‑004)  
+- **Database:** PostgreSQL with Drizzle ORM; schema managed via migrations  
+- **Security:** JWT (access/refresh tokens), API keys, input validation (Zod), global error handler
+
+---
+
+### 2. Phase Completion Details
+
+#### Phase 1 – Core Skeleton ✅
+- Fastify server with Pino logging (request ID support)  
+- Environment configuration validation (Zod)  
+- Database connection foundation (Drizzle client, no tables)  
+- Health endpoint (`GET /api/v1/health`)  
+- Swagger documentation at `/docs`  
+- Docker configuration (backend + PostgreSQL)  
+- Testing infrastructure (Vitest + Supertest)
+
+#### Phase 2 – Gateway & Authentication ✅
+- JWT access/refresh token generation and verification  
+- User registration/login endpoints with password hashing (bcrypt)  
+- Application API key management (hashed keys)  
+- Auth middleware (`Bearer` tokens and `X-Api-Key`)  
+- Protected routes (`/me`, `/applications` creation)  
+- Database tables: `users`, `applications`
+
+#### Phase 3 – Provider Abstraction ✅
+- `IProviderAdapter` interface with standard methods (`generateText`, `streamText`, `healthCheck`)  
+- Provider registry (singleton)  
+- Adapters: Noop (mock), OpenAI, Gemini, DeepSeek (auto‑registered if API keys present)  
+- Chat endpoint (`POST /api/v1/chat`) with provider selection  
+- Provider health endpoint (`GET /api/v1/providers/health`)  
+- Configuration validation for each provider’s API keys and default models
+
+#### Phase 4 – Memory System ✅
+- `memories` table with namespace, content, metadata, placeholder for embeddings  
+- CRUD operations: store, search (full‑text matching), delete  
+- API endpoints: `POST /api/v1/memory`, `GET /api/v1/memory`, `DELETE /api/v1/memory/:id`  
+- Automatic memory saving from chat (user message + AI response) and tool executions  
+- Past memories injected into future chat prompts for context
+
+#### Phase 5 – Tool Engine ✅
+- `ITool` interface and tool registry  
+- Built‑in tools: Calculator (safe expression evaluation), DateTime (ISO/unix/readable formats)  
+- API endpoints: `GET /api/v1/tools`, `POST /api/v1/tools/:name/execute`  
+- Tool executions automatically saved as memories (namespace `tools`)
+
+#### Phase 6 – Workflow Engine ✅
+- Workflow definition structure (steps: tool calls, placeholders `{{previous.result}}`)  
+- Workflow registry and demo workflow (`datetime-and-calc`)  
+- Execution engine with step‑by‑step processing, placeholder resolution, and checkpointing  
+- API endpoints: `POST /api/v1/workflows/:name/run`, `GET /api/v1/workflows/runs/:id`  
+- Run results saved as memories (namespace `workflow-runs`)
+
+#### Phase 7 – Agent Framework ✅
+- `IAgent` interface and `BaseAgent` abstract class (plan → execute → synthesize)  
+- Agent registry  
+- Demo agent `SimpleAssistant`: plans steps based on goal keywords, executes tools/workflows, returns final answer  
+- API endpoint: `POST /api/v1/agents/:name/run`  
+- Agent steps and results automatically saved to memory
+
+---
+
+### 3. Current System Status
+
+**Backend**
+- **Runtime:** Node.js + TypeScript (strict mode)  
+- **Framework:** Fastify with Swagger/OpenAPI  
+- **Database:** Neon (serverless PostgreSQL) – schema fully migrated  
+- **Authentication:** JWT tokens + API keys  
+- **AI Providers:** Noop (active), OpenAI/Gemini/DeepSeek (registered if keys provided)  
+- **Modules:** Health, Auth, Applications, Providers, Chat, Memory, Tools, Workflows, Agents  
+- **API Prefix:** `/api/v1`
+
+**Testing**
+- **Total tests:** 59 (all passing)  
+- **Test types:** unit tests for services, registries, tools, workflows, agents; integration test for health endpoint  
+- **Mocking:** Database calls mocked where needed; providers mocked in agent tests
+
+**Documentation**
+- OpenAPI spec auto‑generated at `/docs/json`  
+- Swagger UI at `/docs`  
+- README with full setup instructions and endpoint list
+
+---
+
+### 4. Architectural Conformity
+
+All development strictly adhered to the approved architecture documents:
+
+- **No provider‑specific code outside Provider Engine** – every AI adapter implements `IProviderAdapter`.  
+- **No direct database access from external layers** – all data operations go through repositories/services.  
+- **Interface‑driven design** – every major subsystem (providers, tools, workflows, agents) communicates via defined contracts.  
+- **No business logic in infrastructure** – Pino, Drizzle, Zod remain purely technical.  
+- **API versioning** – all endpoints under `/api/v1`.  
+- **Stateless where possible** – state is stored only in database (memories, users, etc.).
+
+---

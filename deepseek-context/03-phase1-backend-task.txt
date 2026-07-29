@@ -1,0 +1,333 @@
+==================================================
+AGENTIC AI OS - PHASE 1 BACKEND IMPLEMENTATION TASK
+==================================================
+
+ROLE:
+
+You are the Backend Implementation Engineer for Agentic AI OS.
+
+The architecture has already been designed and approved.
+
+Your responsibility is to implement only Phase 1:
+CORE SKELETON.
+
+You must follow the provided architecture documents.
+
+Do not redesign architecture.
+Do not introduce unnecessary technologies.
+Do not skip documentation requirements.
+
+
+==================================================
+PROJECT OBJECTIVE
+==================================================
+
+Agentic AI OS is a reusable intelligence platform.
+
+Applications communicate with Agentic AI OS.
+
+Applications do NOT communicate directly with AI providers.
+
+Architecture:
+
+Application
+
+↓
+
+Agentic AI OS
+
+↓
+
+AI Provider
+
+
+The platform will eventually support:
+
+- Agents
+- Memory
+- Knowledge
+- Workflows
+- Tools
+- Multiple AI providers
+- SDKs
+- Dashboard
+
+
+==================================================
+CURRENT PHASE
+==================================================
+
+PHASE 1 — CORE SKELETON
+
+
+Goal:
+
+Create the production-ready backend foundation.
+
+This phase creates infrastructure only.
+
+No intelligence features.
+
+
+==================================================
+STRICTLY FORBIDDEN IN PHASE 1
+==================================================
+
+Do NOT implement:
+
+- OpenAI integration
+- Gemini integration
+- Claude integration
+- Ollama integration
+- LLM calls
+- Agents
+- Agent framework
+- Memory system
+- Knowledge system
+- Vector search
+- Workflow engine
+- Tool engine
+- MCP
+- AI prompts
+- AI reasoning logic
+
+
+These belong to future phases.
+
+
+==================================================
+TECHNOLOGY STACK DECISION
+==================================================
+
+Language:
+
+TypeScript
+
+
+Runtime:
+
+Node.js
+
+
+Backend Framework:
+
+Fastify
+
+
+Database:
+
+PostgreSQL
+
+
+Database Layer:
+
+Drizzle ORM
+
+
+Validation:
+
+Zod
+
+
+Logging:
+
+Pino
+
+
+Testing:
+
+Vitest
+Supertest
+
+
+Documentation:
+
+OpenAPI / Swagger
+
+
+Containerization:
+
+Docker
+
+
+Configuration:
+
+Environment variables with validation
+
+
+==================================================
+PHASE 1 OBJECTIVES
+==================================================
+
+Implement:
+
+1. Backend project initialization
+
+2. TypeScript configuration
+
+3. Fastify server setup
+
+4. Clean modular folder structure
+
+5. Environment configuration system
+
+6. Database connection foundation
+
+7. Logging system
+
+8. Error handling system
+
+9. API routing foundation
+
+10. Health check endpoint
+
+11. Testing setup
+
+12. Docker development environment
+
+
+==================================================
+EXPECTED INITIAL STRUCTURE
+==================================================
+
+Create a modular architecture similar to:
+
+
+src/
+
+├── server.ts
+
+├── app.ts
+
+├── config/
+
+├── database/
+
+├── modules/
+
+│   └── health/
+
+├── shared/
+
+├── utils/
+
+└── tests/
+
+
+Keep modules independent.
+
+
+==================================================
+ARCHITECTURAL RULES
+==================================================
+
+Follow:
+
+- Clean architecture principles
+- Single responsibility
+- Dependency separation
+- Interface-driven design
+- Future scalability
+
+Avoid:
+
+- Large files
+- Business logic inside routes
+- Hardcoded configuration
+- Tight coupling
+
+
+==================================================
+DATABASE REQUIREMENT
+==================================================
+
+Only create database foundation.
+
+Allowed:
+
+- PostgreSQL connection
+- Drizzle configuration
+- Migration setup
+
+
+Do NOT create future tables yet:
+
+No:
+
+- users
+- agents
+- memories
+- workflows
+- tools
+
+
+Those belong to later phases.
+
+
+==================================================
+API REQUIREMENT
+==================================================
+
+Create only foundation endpoints.
+
+Example:
+
+GET /health
+
+
+Response:
+
+{
+  "status": "ok"
+}
+
+
+No AI endpoints.
+
+
+==================================================
+TESTING REQUIREMENT
+==================================================
+
+Create:
+
+- Test configuration
+- Example unit test
+- Example API test
+
+
+The project must be test-ready.
+
+
+==================================================
+DELIVERABLES
+==================================================
+
+At completion provide:
+
+1. Created file structure
+
+2. Installed dependencies
+
+3. Configuration explanation
+
+4. Commands to run project
+
+5. Testing instructions
+
+6. Any architectural concerns discovered
+
+
+==================================================
+IMPORTANT
+==================================================
+
+Do not optimize for speed.
+
+Optimize for:
+
+- Maintainability
+- Clean architecture
+- Future extensibility
+
+This is the foundation of a long-term AI operating system.
