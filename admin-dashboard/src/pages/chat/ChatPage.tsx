@@ -125,7 +125,7 @@ export default function ChatPage() {
         {messages.map((msg) => (
           <div key={msg.id} className={`flex gap-3 mb-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
             {msg.role === 'assistant' && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                 <Bot size={16} className="text-indigo-600" />
               </div>
             )}
@@ -144,7 +144,7 @@ export default function ChatPage() {
               )}
             </div>
             {msg.role === 'user' && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                 <User size={16} className="text-gray-600" />
               </div>
             )}
@@ -152,7 +152,7 @@ export default function ChatPage() {
         ))}
         {mutation.isPending && (
           <div className="flex gap-3 mb-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+            <div className="shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
               <Bot size={16} className="text-indigo-600" />
             </div>
             <div className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2">

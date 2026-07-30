@@ -16,6 +16,8 @@ import { registerMemoryModule } from "./modules/memory/index.js";
 import { registerToolsModule } from "./modules/tools/index.js";
 import { registerWorkflowsModule } from "./modules/workflows/index.js";
 import { registerAgentsModule } from "./modules/agents/index.js";
+import { registerKnowledgeModule } from "./modules/knowledge/index.js";
+import { setupDatabase } from "./database/setup.js";
 
 const app = Fastify({
   logger: {
@@ -60,6 +62,59 @@ await app.register(fastifySwagger, {
             apiKey: { type: "string" },
           },
         },
+        // Knowledge schemas
+        Document: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            userId: { type: "string", format: "uuid" },
+            name: { type: "string" },
+            originalName: { type: "string" },
+            mimeType: { type: "string" },
+            size: { type: "integer" },
+            status: { type: "string" },
+            chunkCount: { type: "integer" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        DocumentWithChunks: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            userId: { type: "string", format: "uuid" },
+            name: { type: "string" },
+            originalName: { type: "string" },
+            mimeType: { type: "string" },
+            size: { type: "integer" },
+            status: { type: "string" },
+            chunkCount: { type: "integer" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+            chunks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string", format: "uuid" },
+                  content: { type: "string" },
+                  metadata: { type: "object" },
+                  createdAt: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        SearchResult: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            content: { type: "string" },
+            document_id: { type: "string" },
+            similarity: { type: "number" },
+            metadata: { type: "object" },
+          },
+        },
       },
     },
   },
@@ -72,6 +127,9 @@ await app.register(cors, {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 });
+
+// Enable pgvector extension (idempotent – safe to run every start)
+await setupDatabase();
 
 // Shared plugins (authentication middleware)
 await app.register(authPlugin);
@@ -86,6 +144,7 @@ await registerMemoryModule(app);
 await registerToolsModule(app);
 await registerWorkflowsModule(app);
 await registerAgentsModule(app);
+await registerKnowledgeModule(app);
 
 // Start server
 app.listen({ port: config.PORT, host: "0.0.0.0" }, (err, address) => {

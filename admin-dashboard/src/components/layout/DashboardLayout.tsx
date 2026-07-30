@@ -10,7 +10,7 @@ export default function DashboardLayout() {
       <Sidebar />
       <div className="md:ml-64 flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 py-6">
+        <main className="flex-1 py-6 px-6">
           <Breadcrumbs />
           <Outlet />
         </main>
